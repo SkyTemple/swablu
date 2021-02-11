@@ -57,18 +57,18 @@ def get_rom_hack(dbcon, key):
 def update_hack(dbcon, hack):
     cursor = dbcon.cursor()
     sql = f"UPDATE `{TABLE_NAME}` SET " \
-          f"`name` = '%s'," \
-          f"`description` = '%s'," \
-          f"`screenshot1` = '%s'," \
-          f"`screenshot2` = '%s'," \
-          f"`url_main` = '%s'," \
-          f"`url_discord` = '%s'," \
-          f"`url_download` = '%s'," \
-          f"`video` = '%s'," \
-          f"`hack_type` = '%s'," \
-          f"`message_id` = '%s'" \
+          f"`name` = %s," \
+          f"`description` = %s," \
+          f"`screenshot1` = %s," \
+          f"`screenshot2` = %s," \
+          f"`url_main` = %s," \
+          f"`url_discord` = %s," \
+          f"`url_download` = %s," \
+          f"`video` = %s," \
+          f"`hack_type` = %s," \
+          f"`message_id` = %s" \
           f" WHERE id = %s"
-    cursor.execute(sql % (
+    cursor.execute(sql, (
         hack['name'],
         hack['description'],
         hack['screenshot1'],

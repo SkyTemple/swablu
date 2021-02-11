@@ -1,0 +1,408 @@
+/* Let it be known: I'm not a frontend dev. */
+
+html, body {
+  width:  100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+    font-family: 'Oswald', sans-serif;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 1.2em;
+    color: #222;
+    background-color: #fdf7ee;
+    text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
+    background-image: url("/static/splash.jpg");
+    background-attachment: fixed;
+}
+
+canvas#bgCanvas {
+    image-rendering: pixelated;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -999;
+    width: 100%;
+    height: 100%;
+}
+
+.page-content {
+    display: flex;
+    flex-direction: row;
+    padding: 10% 20px 20px 5%;
+}
+
+.logo {
+    flex: 0.5 1 0;
+    margin-right: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+}
+
+.right {
+    flex: 1 1 0;
+}
+
+h1 {
+    height: 100px;
+    font-size: 3.5em;
+    margin: 0;
+    font-weight: 500;
+}
+
+h2 {
+    height: 50px;
+    font-size: 1.75em;
+    margin: 0;
+    font-weight: 100;
+    white-space: nowrap;
+}
+
+h3 {
+    font-size: 1.25em;
+    margin: 0;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+img {
+    max-width: 100%;
+}
+
+.logo img {
+    width: 220pt;
+    transform: translate(0, -10%);
+    margin-left: auto;
+}
+
+.buttons {
+    margin-top: 30pt;
+}
+
+.buttons table {
+    border-spacing: 10px;
+    border-collapse: separate;
+    width: auto;
+}
+
+.btn {
+    width: 150px;
+    text-align: right;
+    padding: 5px 10px 5px 10px;
+    background-color: #efefef;
+    border: 1px solid #b3b3b3;
+    border-radius: 4px;
+    box-sizing: border-box;
+    text-shadow: none;
+    position: relative;
+    font-family: 'VT323', monospace;
+    font-size: 1.5em;
+}
+
+b {
+    font-weight: 300;
+}
+
+.btn img {
+    position: relative;
+    float: left;
+    margin-top: 4px;
+    height: 22px;
+}
+
+.desc {
+    font-weight: 200;
+}
+
+.buttons a {
+    display: block;
+    width: 100%;
+    text-decoration: inherit;
+}
+
+a {
+    color: inherit;
+}
+
+.promo {
+    width: 100%;
+    margin-left: auto;
+    margin-right: 60pt;
+    margin-top: 30pt;
+}
+
+.disclaimer {
+    margin-top: 20pt;
+    font-size: 0.6em;
+    font-weight: 100;
+    letter-spacing: 1px;
+}
+
+.video-container {
+    position: relative;
+    overflow: hidden;
+    height: 0;
+    padding-top: 56.25%;
+}
+
+.video-container iframe,
+.video-container object,
+.video-container embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+.desktop {
+    display: block;
+}
+.mobile {
+    display: none;
+}
+
+.slide-in {
+    overflow: hidden;
+}
+.slide-in > span {
+    display: inline-block;
+    animation: 0.75s slide-up;
+    margin-top:0;
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        margin-top: 10%;
+        height: 110%;
+    }
+    to {
+        opacity: 100%;
+        margin-top: 0;
+        height: 100%;
+    }
+}
+
+@media only screen and (max-width: 1200px) {
+    h2 {
+        white-space: normal;
+        height: auto;
+    }
+    h2.slide-in > span {
+        animation: none;
+    }
+}
+
+@media only screen and (max-width: 780px) {
+    .desktop {
+        display: none;
+    }
+    .mobile {
+        display: block;
+    }
+    .page-content {
+        flex-direction: column;
+        margin: 30pt 0;
+    }
+    .logo {
+        flex-direction: column-reverse;
+        margin-right: 0;
+    }
+    .logo img {
+        margin-left: 0;
+        width: 120px;
+        max-width: 80%;
+        margin-top: 40px;
+    }
+    .promo {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 40pt;
+        max-width: 640px;
+    }
+    h1 {
+        font-size: 2.5em;
+        height: 72px;
+    }
+    h2 {
+        font-size: 1.5em;
+    }
+}
+
+/* CONTENT PAGES */
+
+.content-box {
+    margin: 20pt auto auto;
+    max-width: 100%;
+    width: 1000px;
+    padding: 20pt;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 15px;
+}
+
+.content-box p {
+    text-shadow: none;
+    font-weight: 300;
+}
+
+.content-box .pre {
+    font-family: monospace;
+}
+
+.content-box p b {
+    font-weight: normal;
+}
+
+.content-box p img {
+    max-width: 100%;
+}
+
+.content-box h1 {
+    margin-bottom: 20pt;
+}
+
+.content-box h2 {
+    margin-bottom: 10pt;
+}
+
+.content-box h3 {
+    margin-bottom: 5pt;
+}
+
+.content-box .centered {
+    text-align: center
+}
+
+@media only screen and (max-width: 1200px) {
+    .content-box {
+        width: auto;
+        max-width: 100%;
+    }
+}
+
+/* END CONTENT PAGES */
+
+/* FORM */
+.red {
+    color: red;
+}
+
+label {
+    display: block;
+    margin-top: 20px;
+}
+
+input, textarea, select, button {
+    display: block;
+    font-size: 1.1em;
+    width: 500px;
+    max-width: 90%;
+}
+
+textarea {
+    height: 150px;
+}
+
+button {
+    margin-top: 30px;
+}
+
+.success {
+    color: green;
+}
+
+form em {
+    font-weight: lighter;
+}
+
+/* GALLERY */
+.hack-details {
+    font-weight: lighter;
+}
+
+.author {
+    display: inline-block;
+}
+
+.hack-details dl {
+    display: inline-block;
+    margin-left: 100px;
+}
+
+.hack-details dt {
+    font-weight: normal;
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.hack-details dd {
+    display: inline-block;
+}
+
+.gallery {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: start;
+    align-items: center;
+}
+
+.gallery > * {
+    position: relative;
+    flex-basis: calc(100% / 3);
+    float: left;
+    margin: 0.5em;
+}
+
+.gallery img {
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.gallery .screenshot {
+    overflow: hidden;
+    height: 0;
+    padding-top: 75%;
+}
+
+.links {
+    display: flex;
+}
+
+.links div {
+    margin: 0.5em;
+}
+
+@media only screen and (max-width: 1200px) {
+    .author {
+        display: block;
+    }
+    .hack-details dl, .hack-details dt, .hack-details dd  {
+        display: block;
+        margin: 0;
+    }
+    .links {
+        flex-wrap: wrap;
+    }
+    .gallery {
+        flex-wrap: wrap;
+    }
+    .gallery > * {
+        width: auto;
+        flex-basis: 100%;
+    }
+}

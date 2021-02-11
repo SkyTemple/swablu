@@ -1,0 +1,36 @@
+version: '3'
+services:
+  swablu:
+    build: .
+    environment:
+      DISCORD_BOT_USER_TOKEN: "..."
+      DISCORD_GUILD_ID: "..."
+      DISCORD_ADMIN_ROLE: "..."
+      DISCORD_CHANNEL_HACKS: "..."
+      MYSQL_HOST: db
+      MYSQL_PORT: "3306"
+      MYSQL_USER: root
+      MYSQL_PASSWORD: swablu
+      MYSQL_DATABASE: swablu
+      OAUTH2_CLIENT_ID: "..."
+      OAUTH2_CLIENT_SECRET: "..."
+      OAUTH2_REDIRECT_URI: "..."
+      MANAGED_HTACCESS_FILE: "/app/.htaccess"
+      BASE_URL: "..."
+      COOKIE_SECRET: "..."
+      PORT: 30321
+    ports:
+      - 30321:30321
+    depends_on:
+      - db
+    volumes:
+      - "/xyz/xyz/.htaccess:/app/.htaccess"
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: swablu
+      MYSQL_DATABASE: swablu
+    volumes:
+      - "./db_data:/var/lib/mysql"

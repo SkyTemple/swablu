@@ -1,0 +1,43 @@
+{% include 'head.html' %}
+<h1>{{ hack["name"] }}</h1>
+<div class="hack-details">
+    <div class="hack-content">
+        <div class="author">by {{ author }}</div>
+        <dl>
+            <dt>Hack Type:</dt>
+            <dd>{{ hack_type }}</dd>
+        </dl>
+        <div class="description">
+            <p>{% for line in description_lines %}
+            {{ line }}<br>
+            {% end %}</p>
+        </div>
+        <div class="links">
+            {% if hack['url_main'] %}
+                <a href="{{ hack['url_main'] }}"><div class="btn" style="background-color: #f5e1dc; border-color: #f56b47;"><img src="/static/images/logo/info.png"> Info</div></a>
+            {% end %}
+            {% if hack['url_download'] %}
+                <a href="{{ hack['url_download'] }}"><div class="btn" style="background-color: #daf2de; border-color: #2e8a40;"><img src="/static/images/logo/download.png"> Download</div></a>
+            {% end %}
+            {% if hack['url_discord'] %}
+                <a href="{{ hack['url_discord'] }}"><div class="btn" style="background-color: #dae0f2; border-color: #647eca;"><img src="/static/images/logo/discord.png"> Discord</div></a>
+            {% end %}
+        </div>
+    </div>
+    <div class="gallery">
+        {% if hack['video'] %}
+            <div><div class="video-container">
+                <iframe src="https://www.youtube.com/embed/{{hack['video']}}"
+                        frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen></iframe>
+            </div></div>
+        {% end %}
+        {% if hack['screenshot1'] %}
+            <div><div class="screenshot"><img src="{{ hack['screenshot1'] }}"></div></div>
+        {% end %}
+        {% if hack['screenshot2'] %}
+            <div><div class="screenshot"><img src="{{ hack['screenshot2'] }}"></div></div>
+        {% end %}
+    </div>
+</div>
+{% include 'foot.html' %}

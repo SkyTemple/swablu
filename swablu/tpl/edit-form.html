@@ -1,0 +1,75 @@
+{% include 'head.html' %}
+<h1>Edit ROM Hack</h1>
+{% if hack['message_id'] %}
+<div><span><em>Your hack micro page is reachable at <a href="https://skytemple.org/{{ hack['key'] }}">https://skytemple.org/{{ hack['key'] }}</a></em></span></div>
+{% else %}
+<div class="red">
+    <span>You may only submit your hack if at least one of the following is true:</span>
+    <ul>
+        <li>Your ROM Hack is finished or has a playable demo.</li>
+        <li>Your ROM Hack is a machinima and has at least one episode released.</li>
+        <li>Your ROM Hack has a Discord server.</li>
+        <li>Your ROM Hack was featured in one of Parakooopa's ROM Hack Showcases.</li>
+    </ul>
+</div>
+{% end %}
+{% if saved %}
+<div class="success">Your changes were saved.</div>
+{% end %}
+<div class="form">
+    <form action="/edit/{{ hack['key'] }}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="key" value="{{ hack['key'] }}">
+        <label for="name">
+            Name*: <input name="name" id="name" placeholder="Name of the ROM Hack" value="{{ hack['name'] or '' }}">
+        </label>
+        <label for="description">
+            Description*: <textarea name="description" id="description" placeholder="A short text describing your ROM Hack">{{ hack['description'] or '' }}</textarea>
+        </label>
+        <label for="hack_type">
+            Hack type*:
+            <select name="hack_type" id="hack_type">
+              <option value="balance_hack_wip" {% if hack['hack_type'] == 'balance_hack_wip' %}selected{% end %}>Balance Hack (work in progress)</option>
+              <option value="balance_hack_demo" {% if hack['hack_type'] == 'balance_hack_demo' %}selected{% end %}>Balance Hack (with demo)</option>
+              <option value="balance_hack" {% if hack['hack_type'] == 'balance_hack' %}selected{% end %}>Balance Hack (finished)</option>
+              <option value="story_hack_wip" {% if hack['hack_type'] == 'story_hack_wip' %}selected{% end %}>Story Hack (work in progress)</option>
+              <option value="story_hack_demo" {% if hack['hack_type'] == 'story_hack_demo' %}selected{% end %}>Story Hack (with demo)</option>
+              <option value="story_hack" {% if hack['hack_type'] == 'story_hack' %}selected{% end %}>Story Hack (finished)</option>
+              <option value="translation_wip" {% if hack['hack_type'] == 'translation_wip' %}selected{% end %}>Translation (work in progress)</option>
+              <option value="translation_demo" {% if hack['hack_type'] == 'translation_demo' %}selected{% end %}>Translation (with demo)</option>
+              <option value="translation" {% if hack['hack_type'] == 'translation' %}selected{% end %}>Translation (finished)</option>
+              <option value="misc_hack_wip" {% if hack['hack_type'] == 'misc_hack_wip' %}selected{% end %}>Misc. Hack (work in progress)</option>
+              <option value="misc_hack_demo" {% if hack['hack_type'] == 'misc_hack_demo' %}selected{% end %}>Misc. Hack (with demo)</option>
+              <option value="misc_hack" {% if hack['hack_type'] == 'misc_hack' %}selected{% end %}>Misc. Hack (finished)</option>
+              <option value="machinima_ongoing" {% if hack['hack_type'] == 'machinima_ongoing' %}selected{% end %}>Machinima (ongoing)</option>
+              <option value="machinima" {% if hack['hack_type'] == 'machinima' %}selected{% end %}>Machinima (finished)</option>
+            </select>
+        </label>
+        <label for="url_main">
+            Main URL*: <input name="url_main" id="url_main" placeholder="Main URL" value="{{ hack['url_main'] or '' }}"/>
+            <em>This should link to a Project Pokémon page or similar for ROM Hacks and YouTube channels for Machinimas.</em>
+        </label>
+        <label for="url_main">
+            Discord URL: <input name="url_discord" id="url_discord" placeholder="Discord URL" value="{{ hack['url_discord'] or '' }}"/>
+            <em>This can link to a Discord community for this hack.</em>
+        </label>
+        <label for="url_download">
+            Download URL: <input name="url_download" id="url_download" placeholder="Download URL" value="{{ hack['url_download'] or '' }}"/>
+            <em>If you have a playable ROM hack, please put the download link here.</em>
+        </label>
+        <label for="screenshot1">
+            Screenshot 1: <input name="screenshot1" id="screenshot1" type="file"/>
+            <em>Max 1MB. Should have the aspect ration of a single DS screen. If not specified the current screenshot will be kept, if there is already one.</em>
+        </label>
+        <label for="screenshot2">
+            Screenshot 2: <input name="screenshot2" id="screenshot2" type="file"/>
+            <em>Max 1MB. Should have the aspect ration of a single DS screen. If not specified the current screenshot will be kept, if there is already one.</em>
+        </label>
+        <label for="video">
+            Youtube Video: <input name="video" id="video" placeholder="YouTube URL" value="{{ hack['video'] or '' }}"/>
+            <em>Link to a YouTube video to use as a trailer / the first episode of your machinima.</em>
+        </label>
+        <button type="submit">Save</button>
+        <span><em>*: Required</em></span>
+    </form>
+</div>
+{% include 'foot.html' %}

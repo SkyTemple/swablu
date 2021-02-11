@@ -1,0 +1,5 @@
+{% include 'head.html' %}
+<h1>Internal Server Error</h1>
+<h2>{{ err.__class__.__name__ }}: {{ err }}</h2>
+<pre><code>{{ trace }}</code></pre>
+{% include 'foot.html' %}

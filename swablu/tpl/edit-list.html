@@ -1,0 +1,11 @@
+{% include 'head.html' %}
+<h1>Your ROM Hacks</h1>
+<p><em>You have access to multiple hacks, please select the one to edit below:</em></p>
+<ul>
+    {% for hack in hack_list %}
+    <li><a href="/edit/{{ hack['key'] }}">
+        {{ hack['key'] }} - {{ hack['name'] }}
+    </a></li>
+    {% end %}
+</ul>
+{% include 'foot.html' %}

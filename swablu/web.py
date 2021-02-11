@@ -126,7 +126,7 @@ class AuthenticatedHandler(BaseHandler, ABC):
             return False
 
         is_admin = any([r.id == DISCORD_ADMIN_ROLE for r in member.roles])
-        role_names = [r.name for r in member.roles]
+        role_names = [r.name for r in member.roles if r.name.startswith("Hack")]
         if is_admin:
             self.hack_access = get_rom_hacks(self.db)
         else:

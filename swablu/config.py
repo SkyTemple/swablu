@@ -10,6 +10,7 @@ from mysql.connector import MySQLConnection
 intents = discord.Intents.default()
 intents.members = True
 intents.presences = True
+intents.guild_messages = True
 discord_client = discord.Client(intents=intents)
 TABLE_NAME = 'rom_hacks'
 logger = logging.getLogger(__name__)

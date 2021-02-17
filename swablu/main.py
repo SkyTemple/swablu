@@ -1,12 +1,15 @@
 import asyncio
 import logging
+
+from swablu.specific.decimeter import schedule_decimeter
+
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 from asyncio import sleep
 
-from discord import Member
+from discord import Member, Message
 from tornado.web import Application
 
 from swablu.config import discord_client, PORT, DISCORD_BOT_USER_TOKEN, get_template_dir, DISCORD_GUILD_ID, \
@@ -40,10 +43,22 @@ async def on_member_update(before: Member, after: Member):
         await check_for(after, get_role(after.guild))
 
 
+@discord_client.event
+async def on_message(message):
+    if message.channel.name == 'welcome' and message.content == '🎉?':
+        greet_count = 0
+        async with message.channel.typing():
+            async for message in message.channel.history(limit=None):
+                message: Message
+                greet_count += sum([r.count for r in message.reactions if r.emoji == '🎉'])
+            await message.channel.send(f'Members have greeted {greet_count} times! 🎉')
+
+
 logger.info('Starting!')
 
 app = Application(routes, template_path=get_template_dir(), static_path=get_static_dir(), cookie_secret=COOKIE_SECRET)
 app.listen(int(PORT))
 aloop = asyncio.get_event_loop()
 asyncio.ensure_future(discord_client.start(DISCORD_BOT_USER_TOKEN), loop=aloop)
+asyncio.ensure_future(schedule_decimeter(), loop=aloop)
 aloop.run_forever()

@@ -4,7 +4,7 @@ from random import randrange
 
 from discord import Guild, TextChannel, Role, Colour
 
-from swablu.config import discord_client
+from swablu.config import discord_client, DISCORD_GUILD_ID
 
 MIN_TIME = 720  # min
 MAX_TIME = 17280  # min
@@ -24,8 +24,6 @@ async def schedule_decimeter():
 
 
 async def show_decimeter():
-    # TODO TEST:
-    DISCORD_GUILD_ID = 710190644152369162
     guild: Guild = discord_client.get_guild(DISCORD_GUILD_ID)
     channel: TextChannel = guild.get_channel(CHANNEL_ID)
     everyone: Role = guild.default_role

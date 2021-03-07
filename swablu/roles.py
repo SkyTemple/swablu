@@ -47,7 +47,7 @@ def get_hack_type_str(hack_type):
     if hack_type == "balance_hack_demo":
         return "Balance Hack (with demo)"
     if hack_type == "balance_hack_mostly":
-        return "Balance Hack (finished)"
+        return "Balance Hack (mostly finished)"
     if hack_type == "balance_hack":
         return "Balance Hack (finished)"
     if hack_type == "story_hack_wip":

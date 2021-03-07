@@ -16,8 +16,13 @@ CHANNEL_ID = 804426600569503815
 
 
 async def schedule_decimeter():
+    first = True
     while True:
-        time = randrange(MIN_TIME, MAX_TIME)
+        if first:
+            first = False
+            time = randrange(0, MAX_TIME)
+        else:
+            time = randrange(MIN_TIME, MAX_TIME)
         logger.info(f'Scheduled next Decimeter event in {time} min.')
         await sleep(time * 60)
         await show_decimeter()
@@ -27,7 +32,7 @@ async def show_decimeter():
     guild: Guild = discord_client.get_guild(DISCORD_GUILD_ID)
     channel: TextChannel = guild.get_channel(CHANNEL_ID)
     everyone: Role = guild.default_role
-    role: Role = guild.get_role(804438255185559662)
+    role: Role = guild.get_role(ROLE_ID)
     await channel.set_permissions(everyone, read_messages=True)
     await role.edit(colour=Colour(COLOR_CODE), hoist=True)
     logger.info(f'DECIMETER EVENT! Ends in {APPEAR_TIME} min.')

@@ -1,3 +1,5 @@
+import json
+
 import tornado.web
 import tornado.escape
 from discord import Client, TextChannel, Embed, Colour
@@ -7,7 +9,7 @@ CHANNEL_ID = 813057591608999957
 
 # noinspection PyAttributeOutsideInit,PyAbstractClass
 class TranslateHookHandler(tornado.web.RequestHandler):
-    def initialize(self, discord_client: Client, *args):
+    def initialize(self, discord_client: Client, *args, **kwargs):
         self.discord_client: Client = discord_client
         self.channel: TextChannel = self.discord_client.get_channel(CHANNEL_ID)
 
@@ -43,3 +45,4 @@ class TranslateHookHandler(tornado.web.RequestHandler):
             )
             embed.set_author(name="Crowdin", url="https://translate.skytemple.org", icon_url="https://skytemple.org/crowdin.png")
             await self.channel.send("New Crowdin string updates.", embed=embed)
+        return self.write(f"ok.\n{description}\n{json.dumps(hook_data)}")

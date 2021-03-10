@@ -255,4 +255,5 @@ routes = [
     (r"/h/(?P<hack_id>[^\/]+)/?", ListingHandler, extra),
     (r"/edit/?", EditListHandler, extra),
     (r"/edit/(?P<hack_id>[^\/]+)/?", EditFormHandler, extra),
+    (r"/translate_hook", TranslateHookHandler, extra),
 ]

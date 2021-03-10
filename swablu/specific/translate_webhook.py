@@ -1,10 +1,12 @@
 import json
+import logging
 
 import tornado.web
 import tornado.escape
 from discord import Client, TextChannel, Embed, Colour
 
 CHANNEL_ID = 813057591608999957
+logger = logging.getLogger(__name__)
 
 
 # noinspection PyAttributeOutsideInit,PyAbstractClass
@@ -15,6 +17,7 @@ class TranslateHookHandler(tornado.web.RequestHandler):
 
     async def post(self, *args, **kwargs):
         hook_data = tornado.escape.json_decode(self.request.body)
+        logger.info(hook_data)
         count_added = 0
         count_updated = 0
         count_removed = 0

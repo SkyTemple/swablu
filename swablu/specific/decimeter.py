@@ -20,7 +20,7 @@ async def schedule_decimeter():
     while True:
         if first:
             first = False
-            time = randrange(0, MAX_TIME)
+            time = randrange(0, MAX_TIME // 5)
         else:
             time = randrange(MIN_TIME, MAX_TIME)
         logger.info(f'Scheduled next Decimeter event in {time} min.')

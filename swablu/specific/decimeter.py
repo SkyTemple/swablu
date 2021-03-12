@@ -8,7 +8,8 @@ from swablu.config import discord_client, DISCORD_GUILD_ID
 
 MIN_TIME = 720  # min
 MAX_TIME = 17280  # min
-APPEAR_TIME = 360  # min
+MIN_APPEAR_TIME = 1  # min
+MAX_APPEAR_TIME = 720  # min
 logger = logging.getLogger(__name__)
 ROLE_ID = 804438255185559662
 COLOR_CODE = 0x3872f1
@@ -35,8 +36,9 @@ async def show_decimeter():
     role: Role = guild.get_role(ROLE_ID)
     await channel.set_permissions(everyone, read_messages=True)
     await role.edit(colour=Colour(COLOR_CODE), hoist=True)
-    logger.info(f'DECIMETER EVENT! Ends in {APPEAR_TIME} min.')
-    await sleep(APPEAR_TIME * 60)
+    appear_time = randrange(MIN_APPEAR_TIME, MAX_APPEAR_TIME)
+    logger.info(f'DECIMETER EVENT! Ends in {appear_time} min.')
+    await sleep(appear_time * 60)
     await channel.set_permissions(everyone, read_messages=False)
     await role.edit(colour=Colour.default(), hoist=False)
     logger.info(f'DECIMETER EVENT ENDED!')

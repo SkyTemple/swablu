@@ -22,9 +22,11 @@ class TranslateHookHandler(tornado.web.RequestHandler):
         count_updated = 0
         count_removed = 0
         description = ""
-        if not isinstance(hook_data, list):
-            hook_data = [hook_data]
-        for hook in hook_data:
+        if 'events' in hook_data:
+            hooks = hook_data['events']
+        else:
+            hooks = [hook_data]
+        for hook in hooks:
             if hook["event"] == "string.added":
                 count_added += 1
             elif hook["event"] == "string.updated":
@@ -39,7 +41,7 @@ class TranslateHookHandler(tornado.web.RequestHandler):
         if count_removed > 0:
             description += f"{count_removed} strings removed.\n"
 
-        if count_added + count_updated > 0:
+        if count_added > 0:
             embed = Embed(
                 title="Crowdin",
                 description=description,

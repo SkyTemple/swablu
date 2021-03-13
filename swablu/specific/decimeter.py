@@ -9,7 +9,7 @@ from swablu.config import discord_client, DISCORD_GUILD_ID
 MIN_TIME = 720  # min
 MAX_TIME = 17280  # min
 MIN_APPEAR_TIME = 1  # min
-MAX_APPEAR_TIME = 720  # min
+MAX_APPEAR_TIME = 1440  # min
 logger = logging.getLogger(__name__)
 ROLE_ID = 804438255185559662
 COLOR_CODE = 0x3872f1
@@ -21,7 +21,7 @@ async def schedule_decimeter():
     while True:
         if first:
             first = False
-            time = randrange(0, MAX_TIME // 5)
+            time = randrange(0, MAX_TIME // 10)
         else:
             time = randrange(MIN_TIME, MAX_TIME)
         logger.info(f'Scheduled next Decimeter event in {time} min.')

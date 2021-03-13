@@ -39,6 +39,17 @@ async def show_decimeter():
     appear_time = randrange(MIN_APPEAR_TIME, MAX_APPEAR_TIME)
     logger.info(f'DECIMETER EVENT! Ends in {appear_time} min.')
     await sleep(appear_time * 60)
+
+    # Something's stirring...
+    await channel.send("*Something's stirring...*")
+    await sleep(60)
+    await channel.send("*Something's approaching...*")
+    await sleep(60)
+    await channel.send("*It's getting closer!*")
+    await sleep(60)
+    await channel.send("*It's right nearby!*")
+    await sleep(60)
+
     await channel.set_permissions(everyone, read_messages=False)
     await role.edit(colour=Colour.default(), hoist=False)
     logger.info(f'DECIMETER EVENT ENDED!')

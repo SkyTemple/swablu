@@ -1,0 +1,23 @@
+{% include 'head.html' %}
+<h1>Guild Point Leaderboard</h1>
+<div>
+    <table>
+        <thead>
+            <tr>
+                <td>Rank</td>
+                <td>User</td>
+                <td>Points</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pos, name, points in all_points %}
+            <tr>
+                <td>#{{ pos }}</td>
+                <td>{{ name }}</td>
+                <td>{{ points }}</td>
+            </tr>
+            {% end %}
+        </tbody>
+    </table>
+</div>
+{% include 'foot.html' %}

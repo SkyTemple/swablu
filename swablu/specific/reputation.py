@@ -1,0 +1,208 @@
+import json
+import logging
+import traceback
+from typing import List, Tuple
+
+import tornado.web
+from discord import Message, DMChannel, TextChannel, User
+from discord.ext.commands import TextChannelConverter, UserConverter
+
+from swablu.config import discord_client, DISCORD_GUILD_ID, database, TABLE_NAME_REPUTATION
+
+ALLOWED_ROLES = [
+    712704493661192275,  # Admin
+    712704743419543564,  # Mod
+    776491019020926976,  # PMDCollab
+    712704976752738406,  # ROM Hack Creator
+    764601232794058752,  # Sprite Approver
+]
+
+AUTHORIZED_DM_USERS = [
+    101386221028134912,  # Parakoopa
+    548718661129732106,  # SpriteBot
+]
+
+DEFAULT_AUTHOR_DESCRIPTION = {
+    'author': 'Parakoopa',
+    'description': "ROM editor for Pokémon Mystery Dungeon Explorers of Sky. Let's you edit starters, graphics, scenes, dungeons and more!"
+}
+
+prefix = '!'
+logger = logging.getLogger(__name__)
+
+
+class MiniCtx:
+    def __init__(self, guild, bot, message):
+        self.guild = guild
+        self.bot = bot
+        self.message = message
+        self._state = message._state
+
+
+def get_guild_points_for(user: User) -> int:
+    cursor = database.cursor(dictionary=True)
+    sql = f"SELECT * FROM `{TABLE_NAME_REPUTATION}` WHERE discord_id = %s"
+    cursor.execute(sql, (user.id,))
+    r = cursor.fetchone()
+    d = 0
+    if r:
+        d = r['points']
+    database.commit()
+    cursor.close()
+    return d
+
+
+def give_guild_points_to(user: User, amount: int):
+    cursor = database.cursor()
+    sql = f"INSERT INTO {TABLE_NAME_REPUTATION} (discord_id, points) VALUES(%s, %s) ON DUPLICATE KEY UPDATE points=%s"
+    pnts = get_guild_points_for(user) + amount
+    cursor.execute(sql, (
+        user.id,
+        pnts, pnts
+    ))
+    database.commit()
+    cursor.close()
+
+
+def _get_username(id: int):
+    try:
+        u: User = discord_client.get_user(id)
+        return u.name + '#' + u.discriminator
+    except:
+        return f'<@{id}>'
+
+
+def get_all_guild_points() -> List[Tuple[int, str, int]]:
+    cursor = database.cursor(dictionary=True)
+    sql = f"SELECT * FROM `{TABLE_NAME_REPUTATION}` ORDER BY `points` DESC"
+    cursor.execute(sql)
+    d = []
+    for i, k in enumerate(cursor.fetchall()):
+        d.append((i + 1, _get_username(k['discord_id']), k['points']))
+    database.commit()
+    cursor.close()
+    return d
+
+
+async def process_cmd_dm(message: Message):
+    cmd_parts = message.content.split(' ')
+    channel_converter = TextChannelConverter()
+    ctx = MiniCtx(discord_client.get_guild(DISCORD_GUILD_ID), discord_client, message)
+    try:
+        if cmd_parts[0] == prefix + 'gr' or cmd_parts[0] == prefix + 'tr':
+            if len(cmd_parts) < 4:
+                await message.channel.send(json.dumps({
+                    'status': 'error',
+                    'error': 'gr or tr commands need to have 3 arguments: <user> <amount> <channel>.'
+                }))
+                return
+            channel = await channel_converter.convert(ctx, cmd_parts[3])
+            await process_gr(message, channel, cmd_parts[0] == prefix + 'tr')
+            await message.channel.send(json.dumps({
+                'status': 'success',
+                'result': 'See channel.'
+            }))
+        elif cmd_parts[0] == prefix + 'checkr':
+            gps = get_guild_points_for(await UserConverter().convert(ctx, cmd_parts[1]))
+            await message.channel.send(json.dumps({
+                'status': 'success',
+                'result': gps
+            }))
+        else:
+            await message.channel.send(json.dumps({
+                'status': 'error',
+                'error': 'Unknown Command'
+            }))
+    except Exception as ex:
+        await message.channel.send(json.dumps({
+            'status': 'error',
+            'error': str(ex)
+        }))
+
+
+async def process_gr(message: Message, channel: TextChannel, negative: bool):
+    cmd_parts = message.content.split(' ')
+    ctx = MiniCtx(message.guild, discord_client, message)
+    if len(cmd_parts) < 2:
+        raise ValueError("Missing parameters. Usage: -gr/-tr <user> [points]")
+    if len(cmd_parts) < 3:
+        points = 1
+    else:
+        try:
+            points = int(cmd_parts[2])
+        except ValueError:
+            raise ValueError("The number of points to give must be a number.")
+    if negative:
+        points *= -1
+    if points == 0:
+        return
+    user = await UserConverter().convert(ctx, cmd_parts[1])
+    give_guild_points_to(user, points)
+    gps = get_guild_points_for(user)
+    if points > 0:
+        await channel.send(
+            f"Gave `{points}` Guild Point(s) to **{user.name}** (current: `{gps}`). -- Leaderboard: <https://hacks.skytemple.org/guildpoints>"
+        )
+    else:
+        await channel.send(
+            f"Took away `{-1 * points}` Guild Point(s) from **{user.name}** (current: `{gps}`). -- Leaderboard: <https://hacks.skytemple.org/guildpoints>"
+        )
+
+
+async def process_toprep(message: Message):
+    await message.channel.send(
+        "Visit <https://hacks.skytemple.org/guildpoints> for the leaderboard."
+    )
+
+
+async def process_checkr(message: Message):
+    cmd_parts = message.content.split(' ')
+    ctx = MiniCtx(message.guild, discord_client, message)
+    user: User
+    if len(cmd_parts) < 2:
+        user = message.author
+    else:
+        user = await UserConverter().convert(ctx, cmd_parts[1])
+    gps = get_guild_points_for(user)
+    await message.channel.send(
+        f"**{user.name}** has `{gps}` Guild Point(s). -- Leaderboard: <https://hacks.skytemple.org/guildpoints>"
+    )
+
+
+async def process_cmd(message: Message):
+    if isinstance(message.channel, DMChannel):
+        if message.author.id in AUTHORIZED_DM_USERS:
+            await process_cmd_dm(message)
+    else:
+        cmd_parts = message.content.split(' ')
+        try:
+            if cmd_parts[0] == prefix + 'gr' or cmd_parts[0] == prefix + 'tr':
+                if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
+                    raise RuntimeError("You are not allowed to give or take Guild Points.")
+                await process_gr(message, message.channel, cmd_parts[0] == prefix + 'tr')
+            elif cmd_parts[0] == prefix + 'checkr':
+                await process_checkr(message)
+            elif cmd_parts[0] == prefix + 'toprep':
+                await process_toprep(message)
+        except Exception as ex:
+            logger.error("Error running rep command", exc_info=ex)
+            await message.channel.send(f"Error running this command: {str(ex)}")
+
+
+# noinspection PyAttributeOutsideInit,PyAbstractClass,PyShadowingNames
+class GuildPointsHandler(tornado.web.RequestHandler):
+    async def get(self, *args, **kwargs):
+        try:
+            await self.render("points.html", title="SkyTemple - Guild Points",
+                              all_points=get_all_guild_points(), **DEFAULT_AUTHOR_DESCRIPTION)
+        except Exception as err:
+            self.set_status(500)
+            logger.exception(err)
+            await self.render("error.html", title="SkyTemple - Internal Server Error",
+                              trace=traceback.format_exc(), err=err, **DEFAULT_AUTHOR_DESCRIPTION)
+
+
+def collect_web_routes(extra):
+    return [
+        (r"/guildpoints", GuildPointsHandler)
+    ]

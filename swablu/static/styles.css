@@ -384,6 +384,14 @@ form em {
     margin: 0.5em;
 }
 
+thead tr td {
+    border-bottom: 1px solid #222;
+}
+
+tbody tr td {
+    font-weight: 200;
+}
+
 @media only screen and (max-width: 1200px) {
     .author {
         display: block;

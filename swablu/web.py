@@ -21,6 +21,7 @@ from swablu.config import discord_client, database, AUTHORIZATION_BASE_URL, OAUT
     regenerate_htaccess, DISCORD_CHANNEL_HACKS, update_hack, get_rom_hack
 from swablu.discord_util import regenerate_message, get_authors
 from swablu.roles import get_hack_type_str
+from swablu.specific import reputation
 from swablu.specific.translate_webhook import TranslateHookHandler
 
 OAUTH_SCOPE = ['identify']
@@ -257,4 +258,4 @@ routes = [
     (r"/edit/?", EditListHandler, extra),
     (r"/edit/(?P<hack_id>[^\/]+)/?", EditFormHandler, extra),
     (r"/translate_hook", TranslateHookHandler, extra),
-]
+] + reputation.collect_web_routes(extra)

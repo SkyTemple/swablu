@@ -13,7 +13,43 @@ intents.presences = True
 intents.guild_messages = True
 discord_client = discord.Client(intents=intents)
 TABLE_NAME = 'rom_hacks'
+TABLE_NAME_REPUTATION = 'rep'
 logger = logging.getLogger(__name__)
+
+
+if 'DISCORD_BOT_USER_TOKEN' not in os.environ:
+    raise ValueError("No bot token (env DISCORD_BOT_USER_TOKEN).")
+DISCORD_BOT_USER_TOKEN = os.environ['DISCORD_BOT_USER_TOKEN']
+if 'DISCORD_GUILD_ID' not in os.environ:
+    raise ValueError("No env DISCORD_GUILD_ID.")
+DISCORD_GUILD_ID = int(os.environ['DISCORD_GUILD_ID'])
+if 'DISCORD_ADMIN_ROLE' not in os.environ:
+    raise ValueError("No env DISCORD_ADMIN_ROLE.")
+DISCORD_ADMIN_ROLE = int(os.environ['DISCORD_ADMIN_ROLE'])
+if 'DISCORD_CHANNEL_HACKS' not in os.environ:
+    raise ValueError("No env DISCORD_CHANNEL_HACKS.")
+DISCORD_CHANNEL_HACKS = int(os.environ['DISCORD_CHANNEL_HACKS'])
+if 'PORT' not in os.environ:
+    raise ValueError("No env PORT.")
+PORT = os.environ['PORT']
+if 'OAUTH2_CLIENT_ID' not in os.environ:
+    raise ValueError("No env OAUTH2_CLIENT_ID.")
+OAUTH2_CLIENT_ID = os.environ['OAUTH2_CLIENT_ID']
+if 'OAUTH2_CLIENT_SECRET' not in os.environ:
+    raise ValueError("No env OAUTH2_CLIENT_SECRET.")
+OAUTH2_CLIENT_SECRET = os.environ['OAUTH2_CLIENT_SECRET']
+if 'OAUTH2_REDIRECT_URI' not in os.environ:
+    raise ValueError("No env OAUTH2_REDIRECT_URI.")
+OAUTH2_REDIRECT_URI = os.environ['OAUTH2_REDIRECT_URI']
+if 'COOKIE_SECRET' not in os.environ:
+    raise ValueError("No env COOKIE_SECRET.")
+COOKIE_SECRET = os.environ['COOKIE_SECRET']
+if 'MANAGED_HTACCESS_FILE' not in os.environ:
+    raise ValueError("No env MANAGED_HTACCESS_FILE.")
+MANAGED_HTACCESS_FILE = os.environ['MANAGED_HTACCESS_FILE']
+if 'BASE_URL' not in os.environ:
+    raise ValueError("No env MANAGED_HTACCESS_FILE.")
+BASE_URL = os.environ['BASE_URL']
 
 
 def check_table_exists(dbcon, tablename):
@@ -106,7 +142,7 @@ while database is None:
 
 if not check_table_exists(database, TABLE_NAME):
     dbcur = database.cursor()
-    logger.info("Creating table...")
+    logger.info("Creating hacks table...")
     # Could surely be optimized, but fine for now.
     dbcur.execute(f"""
     CREATE TABLE `{TABLE_NAME}` (
@@ -130,41 +166,22 @@ if not check_table_exists(database, TABLE_NAME):
     """)
     dbcur.close()
 else:
-    logger.info("Table existed!")
+    logger.info("Hacks table existed!")
 
-if 'DISCORD_BOT_USER_TOKEN' not in os.environ:
-    raise ValueError("No bot token (env DISCORD_BOT_USER_TOKEN).")
-DISCORD_BOT_USER_TOKEN = os.environ['DISCORD_BOT_USER_TOKEN']
-if 'DISCORD_GUILD_ID' not in os.environ:
-    raise ValueError("No env DISCORD_GUILD_ID.")
-DISCORD_GUILD_ID = int(os.environ['DISCORD_GUILD_ID'])
-if 'DISCORD_ADMIN_ROLE' not in os.environ:
-    raise ValueError("No env DISCORD_ADMIN_ROLE.")
-DISCORD_ADMIN_ROLE = int(os.environ['DISCORD_ADMIN_ROLE'])
-if 'DISCORD_CHANNEL_HACKS' not in os.environ:
-    raise ValueError("No env DISCORD_CHANNEL_HACKS.")
-DISCORD_CHANNEL_HACKS = int(os.environ['DISCORD_CHANNEL_HACKS'])
-if 'PORT' not in os.environ:
-    raise ValueError("No env PORT.")
-PORT = os.environ['PORT']
-if 'OAUTH2_CLIENT_ID' not in os.environ:
-    raise ValueError("No env OAUTH2_CLIENT_ID.")
-OAUTH2_CLIENT_ID = os.environ['OAUTH2_CLIENT_ID']
-if 'OAUTH2_CLIENT_SECRET' not in os.environ:
-    raise ValueError("No env OAUTH2_CLIENT_SECRET.")
-OAUTH2_CLIENT_SECRET = os.environ['OAUTH2_CLIENT_SECRET']
-if 'OAUTH2_REDIRECT_URI' not in os.environ:
-    raise ValueError("No env OAUTH2_REDIRECT_URI.")
-OAUTH2_REDIRECT_URI = os.environ['OAUTH2_REDIRECT_URI']
-if 'COOKIE_SECRET' not in os.environ:
-    raise ValueError("No env COOKIE_SECRET.")
-COOKIE_SECRET = os.environ['COOKIE_SECRET']
-if 'MANAGED_HTACCESS_FILE' not in os.environ:
-    raise ValueError("No env MANAGED_HTACCESS_FILE.")
-MANAGED_HTACCESS_FILE = os.environ['MANAGED_HTACCESS_FILE']
-if 'BASE_URL' not in os.environ:
-    raise ValueError("No env MANAGED_HTACCESS_FILE.")
-BASE_URL = os.environ['BASE_URL']
+if not check_table_exists(database, TABLE_NAME_REPUTATION):
+    dbcur = database.cursor()
+    logger.info("Creating reputation table...")
+    # Could surely be optimized, but fine for now.
+    dbcur.execute(f"""
+    CREATE TABLE `{TABLE_NAME_REPUTATION}` (
+        `discord_id` BIGINT(30) unsigned NOT NULL,
+        `points` INT(20) signed NOT NULL,
+        PRIMARY KEY (`discord_id`)
+    );
+    """)
+    dbcur.close()
+else:
+    logger.info("Reputation table existed!")
 
 
 

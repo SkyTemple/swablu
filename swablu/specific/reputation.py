@@ -20,7 +20,10 @@ ALLOWED_ROLES = [
 AUTHORIZED_DM_USERS = [
     101386221028134912,  # Parakoopa
     548718661129732106,  # SpriteBot
+    117780585635643396.  # Audino
 ]
+
+BOT_DM_CHANNEL = 822865440489472020
 
 DEFAULT_AUTHOR_DESCRIPTION = {
     'author': 'Parakoopa',
@@ -170,23 +173,24 @@ async def process_checkr(message: Message):
 
 
 async def process_cmd(message: Message):
-    if isinstance(message.channel, DMChannel):
-        if message.author.id in AUTHORIZED_DM_USERS:
-            await process_cmd_dm(message)
-    else:
-        cmd_parts = message.content.split(' ')
-        try:
-            if cmd_parts[0] == prefix + 'gr' or cmd_parts[0] == prefix + 'tr':
-                if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
-                    raise RuntimeError("You are not allowed to give or take Guild Points.")
-                await process_gr(message, message.channel, cmd_parts[0] == prefix + 'tr')
-            elif cmd_parts[0] == prefix + 'checkr':
-                await process_checkr(message)
-            elif cmd_parts[0] == prefix + 'toprep':
-                await process_toprep(message)
-        except Exception as ex:
-            logger.error("Error running rep command", exc_info=ex)
-            await message.channel.send(f"Error running this command: {str(ex)}")
+    if isinstance(message.channel, TextChannel):
+        if message.channel.id == BOT_DM_CHANNEL:
+            if message.author.id in AUTHORIZED_DM_USERS:
+                await process_cmd_dm(message)
+        else:
+            cmd_parts = message.content.split(' ')
+            try:
+                if cmd_parts[0] == prefix + 'gr' or cmd_parts[0] == prefix + 'tr':
+                    if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
+                        raise RuntimeError("You are not allowed to give or take Guild Points.")
+                    await process_gr(message, message.channel, cmd_parts[0] == prefix + 'tr')
+                elif cmd_parts[0] == prefix + 'checkr':
+                    await process_checkr(message)
+                elif cmd_parts[0] == prefix + 'toprep':
+                    await process_toprep(message)
+            except Exception as ex:
+                logger.error("Error running rep command", exc_info=ex)
+                await message.channel.send(f"Error running this command: {str(ex)}")
 
 
 # noinspection PyAttributeOutsideInit,PyAbstractClass,PyShadowingNames

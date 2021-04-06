@@ -24,6 +24,7 @@ AUTHORIZED_DM_USERS = [
 ]
 
 BOT_DM_CHANNEL = 822865440489472020
+DEFAULT_REP = 3
 
 DEFAULT_AUTHOR_DESCRIPTION = {
     'author': 'Parakoopa',
@@ -47,7 +48,7 @@ def get_guild_points_for(user: User) -> int:
     sql = f"SELECT * FROM `{TABLE_NAME_REPUTATION}` WHERE discord_id = %s"
     cursor.execute(sql, (user.id,))
     r = cursor.fetchone()
-    d = 0
+    d = DEFAULT_REP
     if r:
         d = r['points']
     database.commit()

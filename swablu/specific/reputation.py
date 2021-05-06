@@ -4,10 +4,11 @@ import traceback
 from typing import List, Tuple
 
 import tornado.web
-from discord import Message, DMChannel, TextChannel, User
+from discord import Message, TextChannel, User
 from discord.ext.commands import TextChannelConverter, UserConverter
 
 from swablu.config import discord_client, DISCORD_GUILD_ID, database, TABLE_NAME_REPUTATION
+from swablu.util import MiniCtx
 
 ALLOWED_ROLES = [
     712704493661192275,  # Admin
@@ -33,14 +34,6 @@ DEFAULT_AUTHOR_DESCRIPTION = {
 
 prefix = '!'
 logger = logging.getLogger(__name__)
-
-
-class MiniCtx:
-    def __init__(self, guild, bot, message):
-        self.guild = guild
-        self.bot = bot
-        self.message = message
-        self._state = message._state
 
 
 def get_guild_points_for(user: User) -> int:

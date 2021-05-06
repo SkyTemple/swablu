@@ -55,6 +55,7 @@ async def on_message(message: Message):
             await message.channel.send(f'Members have greeted {greet_count} times! 🎉')
     else:
         await reputation.process_cmd(message)
+        await hacks_mgmnt.process_cmd(message)
 
 
 logger.info('Starting!')

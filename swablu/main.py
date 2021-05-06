@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from swablu.specific import reputation
+from swablu.specific import reputation, hacks_mgmnt
 from swablu.specific.decimeter import schedule_decimeter
 
 logging.basicConfig(

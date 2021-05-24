@@ -86,6 +86,8 @@ async def process_cmd_dm(message: Message):
     channel_converter = TextChannelConverter()
     ctx = MiniCtx(discord_client.get_guild(DISCORD_GUILD_ID), discord_client, message)
     try:
+        if not cmd_parts[0].startswith(prefix):
+            return
         if cmd_parts[0] == prefix + 'gr' or cmd_parts[0] == prefix + 'tr':
             if len(cmd_parts) < 4:
                 await message.channel.send(json.dumps({

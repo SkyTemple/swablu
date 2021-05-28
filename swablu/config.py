@@ -126,7 +126,7 @@ def regenerate_htaccess():
     logger.info("Regenerating htaccess...")
     with open(MANAGED_HTACCESS_FILE, 'w') as f:
         for hack in get_rom_hacks(database):
-            f.write(f"RedirectMatch 301 (?i)/{hack['key']}/? {BASE_URL}/h/{hack['key']}\n")
+            f.write(f"RedirectMatch 301 (?i)/{hack['key']}$/? {BASE_URL}/h/{hack['key']}\n")
 
 
 logger.info("Connect to DB...")

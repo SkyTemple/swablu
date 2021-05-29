@@ -70,6 +70,8 @@ def get_rom_hacks(dbcon, filter=None):
         sql = f"SELECT * FROM `{TABLE_NAME}`"
         cursor.execute(sql)
     else:
+        if len(filter) < 1:
+            return []
         format_strings = ','.join(['%s'] * len(filter))
         sql = f"SELECT * FROM `{TABLE_NAME}` WHERE role_name IN (%s)"
         cursor.execute(sql % format_strings, tuple(filter))

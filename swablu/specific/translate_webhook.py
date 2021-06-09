@@ -19,7 +19,6 @@ class TranslateHookHandler(tornado.web.RequestHandler):
         hook_data = tornado.escape.json_decode(self.request.body)
         logger.info(hook_data)
         count_added = 0
-        count_updated = 0
         count_removed = 0
         description = ""
         if 'events' in hook_data:
@@ -29,15 +28,11 @@ class TranslateHookHandler(tornado.web.RequestHandler):
         for hook in hooks:
             if hook["event"] == "string.added":
                 count_added += 1
-            elif hook["event"] == "string.updated":
-                count_updated += 1
             elif hook["event"] == "string.deleted":
                 count_removed += 1
 
         if count_added > 0:
             description += f"{count_added} strings added.\n"
-        if count_updated > 0:
-            description += f"{count_updated} strings updated.\n"
         if count_removed > 0:
             description += f"{count_removed} strings removed.\n"
 

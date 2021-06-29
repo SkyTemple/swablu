@@ -13,7 +13,6 @@ async def check_for(member: Member, role: Role):
     if role is None:
         return
     should = False
-    return
     for activity in member.activities:
         activity: BaseActivity
         if hasattr(activity, 'application_id') and activity.application_id == skytemple_app_id:

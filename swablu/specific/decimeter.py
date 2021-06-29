@@ -17,7 +17,6 @@ CHANNEL_ID = 804426600569503815
 
 
 async def schedule_decimeter():
-    return
     first = True
     while True:
         if first:

@@ -17,6 +17,7 @@ body {
     text-shadow: 1px 1px 2px rgba(150, 150, 150, 1);
     background-image: url("/static/splash.jpg");
     background-attachment: fixed;
+    background-size: cover;
 }
 
 canvas#bgCanvas {
@@ -361,6 +362,10 @@ form em {
     margin: 0.5em;
 }
 
+.gallery.two-items > * {
+    flex-basis: calc(100% / 2);
+}
+
 .gallery img {
     object-fit: cover;
     position: absolute;
@@ -392,13 +397,107 @@ tbody tr td {
     font-weight: 200;
 }
 
+.jam-details h3 {
+    white-space: normal;
+}
+
+.jam-details .hack-list {
+    display: flex;
+    flex-direction: column;
+    gap: 100px;
+}
+
+.jam-details .hack-content {
+    display: flex;
+    gap: 30px;
+    flex-basis: 100%;
+}
+
+.jam-details h2 {
+    margin-top: 150px;
+}
+
+.jam-details .hack-content .description {
+    flex-basis: 70%;
+}
+
+.jam-details .hack-content .judgement {
+    flex-basis: 30%;
+}
+
+.awards {
+    background: rgba(0,0,0,0.1);
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+}
+
+.awards ul {
+    list-style: none;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.awards ul .golden img {
+    height: 100px;
+    vertical-align: middle;
+    padding-right: 10px;
+}
+.awards ul .golden li {
+    font-size: 3em;
+}
+
+.awards ul .silver img {
+    height: 75px;
+    vertical-align: middle;
+    padding-right: 10px;
+}
+.awards ul .silver li {
+    font-size: 2em;
+}
+
+.awards ul .bronze img {
+    height: 50px;
+    vertical-align: middle;
+    padding-right: 10px;
+}
+.awards ul .bronze li {
+    font-size: 1.5em;
+}
+figure {
+    font-style: italic;
+    font-weight: normal;
+    margin: 45px 0 0;
+}
+figure blockquote {
+    margin: 0;
+}
+figure figcaption {
+    margin-left: 20px;
+}
+figure figcaption:before {
+    display: inline-block;
+    content: '- ';
+}
+
 @media only screen and (max-width: 1200px) {
     .author {
         display: block;
     }
+    .jam-details .hack-content .description {
+        flex-basis: 100%;
+    }
+
+    .jam-details .hack-content .judgement {
+        flex-basis: 100%;
+    }
     .hack-details dl, .hack-details dt, .hack-details dd  {
         display: block;
         margin: 0;
+    }
+    .jam-details .hack-content {
+        flex-wrap: wrap;
+        gap: 0;
     }
     .links {
         flex-wrap: wrap;
@@ -408,6 +507,6 @@ tbody tr td {
     }
     .gallery > * {
         width: auto;
-        flex-basis: 100%;
+        flex-basis: 100% !important;
     }
 }

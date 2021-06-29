@@ -1,0 +1,47 @@
+{% include 'head.html' %}
+<h3>SkyTemple Hack Jam</h3>
+<h1>{{ jam["motto"] }}</h1>
+<div class="jam-details">
+    <div class="jam-description">
+        <p>{{ jam ["description"] }}</p>
+        <p><strong>Motto: </strong>{{ jam["motto"] }}</p>
+        <p><strong>Gimmick: </strong>{{ jam["gimmick"] }}</p>
+        <div class="info">Want to find out more about why we decided how we did?
+            Ask the Jury on our <a href="https://discord.gg/skytemple>">Discord</a>! Some of the Jury members also have
+            playthroughs on their YouTube channels.</div>
+    </div>
+    <h2>Winners</h2>
+    <div class="hack-list">
+        {% for hack_key in winners %}
+            {% set hack = hackdata[hack_key] %}
+            {% set key = hack_key %}
+            {% set jury = jam['hacks'][hack_key] %}
+            {% include 'jam_hack_content.html' %}
+        {% end %}
+    </div>
+    {% if len(others) > 0 %}
+    <h2>Also Winners :)</h2>
+    <p class="sub">{{ jam['other_text'] }}</p>
+    <div class="hack-list">
+        {% for hack_key in others %}
+            {% set hack = hackdata[hack_key] %}
+            {% set key = hack_key %}
+            {% set jury = jam['hacks'][hack_key] %}
+            {% include 'jam_hack_content.html' %}
+        {% end %}
+    </div>
+    {% end %}
+    {% if len(jam['dq']) > 0 %}
+    <h2>Disqualified</h2>
+    <p class="sub">These hacks were disqualified for various reasons. We still want to show them to you!</p>
+    <div class="hack-list">
+        {% for hack_data in jam['dq'] %}
+            {% set hack = hack_data %}
+            {% set key = None %}
+            {% set jury = hack_data['jury'] %}
+            {% include 'jam_hack_content.html' %}
+        {% end %}
+    </div>
+    {% end %}
+</div>
+{% include 'foot.html' %}

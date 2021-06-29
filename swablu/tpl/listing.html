@@ -24,7 +24,7 @@
             {% end %}
         </div>
     </div>
-    <div class="gallery">
+    <div class="gallery {% if not hack['video'] %}two-items{% end %}">
         {% if hack['video'] %}
             <div><div class="video-container">
                 <iframe src="https://www.youtube.com/embed/{{hack['video']}}"

@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from time import sleep
@@ -14,6 +15,7 @@ intents.guild_messages = True
 discord_client = discord.Client(intents=intents)
 TABLE_NAME = 'rom_hacks'
 TABLE_NAME_REPUTATION = 'rep'
+TABLE_NAME_JAM = 'jam'
 logger = logging.getLogger(__name__)
 
 
@@ -91,6 +93,16 @@ def get_rom_hack(dbcon, key):
     dbcon.commit()
     cursor.close()
     return d
+
+
+def get_jam(dbcon, key):
+    cursor = dbcon.cursor(dictionary=True)
+    sql = f"SELECT * FROM `{TABLE_NAME_JAM}` WHERE `key` = %s"
+    cursor.execute(sql, (key,))
+    d = cursor.fetchone()
+    dbcon.commit()
+    cursor.close()
+    return json.loads(d['config'])
 
 
 def update_hack(dbcon, hack):
@@ -184,6 +196,21 @@ if not check_table_exists(database, TABLE_NAME_REPUTATION):
     dbcur.close()
 else:
     logger.info("Reputation table existed!")
+
+if not check_table_exists(database, TABLE_NAME_JAM):
+    dbcur = database.cursor()
+    logger.info("Creating jam table...")
+    dbcur.execute(f"""
+    CREATE TABLE `{TABLE_NAME_JAM}` (
+        `id` INT(10) unsigned NOT NULL AUTO_INCREMENT,
+        `key` VARCHAR(80) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+        `config` TEXT CHARACTER SET utf8 COLLATE utf8_bin,
+        PRIMARY KEY (`id`)
+    );
+    """)
+    dbcur.close()
+else:
+    logger.info("Jam table existed!")
 
 
 

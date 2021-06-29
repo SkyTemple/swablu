@@ -21,6 +21,8 @@ async def regenerate_message(discord_client: Client, channel_id: int, message_id
 
 
 def get_authors(discord_client, rrole: str, as_names=False):
+    if rrole == 'Hack: PMD: Fragments' and as_names:
+        return 'Irdkwia'
     guild = discord_client.get_guild(DISCORD_GUILD_ID)
     authors = '???'
     for role in guild.roles:

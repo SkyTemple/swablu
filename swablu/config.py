@@ -87,7 +87,7 @@ def get_rom_hacks(dbcon, filter=None):
 
 
 def get_rom_hack(dbcon, key):
-    cursor = dbcon.cursor(dictionary=True buffered=True)
+    cursor = dbcon.cursor(dictionary=True, buffered=True)
     sql = f"SELECT * FROM `{TABLE_NAME}` WHERE `key` = %s"
     cursor.execute(sql, (key,))
     d = cursor.fetchone()
@@ -97,7 +97,7 @@ def get_rom_hack(dbcon, key):
 
 
 def get_jam(dbcon, key):
-    cursor = dbcon.cursor(dictionary=True buffered=True)
+    cursor = dbcon.cursor(dictionary=True, buffered=True)
     sql = f"SELECT * FROM `{TABLE_NAME_JAM}` WHERE `key` = %s"
     cursor.execute(sql, (key,))
     d = cursor.fetchone()

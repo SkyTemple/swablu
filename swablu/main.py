@@ -10,7 +10,7 @@ logging.basicConfig(
 )
 from asyncio import sleep
 
-from discord import Member, Message, TextChannel
+from discord import Member, Message, TextChannel, User
 from tornado.web import Application
 
 from swablu.config import discord_client, PORT, DISCORD_BOT_USER_TOKEN, get_template_dir, DISCORD_GUILD_ID, \
@@ -53,6 +53,8 @@ async def on_message(message: Message):
                 message: Message
                 greet_count += sum([r.count for r in message.reactions if r.emoji == '🎉'])
             await message.channel.send(f'Members have greeted {greet_count} times! 🎉')
+    elif message.content.lower() == 'no u' and message.author.id != 789984504839929876:
+        await message.channel.send('no u')
     else:
         await reputation.process_cmd(message)
         await hacks_mgmnt.process_cmd(message)

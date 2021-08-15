@@ -17,11 +17,12 @@ from swablu.config import discord_client, PORT, DISCORD_BOT_USER_TOKEN, get_temp
     get_static_dir, COOKIE_SECRET
 from swablu.roles import scan_roles, check_for, get_role
 from swablu.web import routes
-
+import re
 
 loop_started = False
 logger = logging.getLogger(__name__)
 
+ANNOUNCEMENT_THREAD_ARCHIVE_DURATION = 1440 # 24 hours
 
 async def loop():
     while True:
@@ -55,6 +56,16 @@ async def on_message(message: Message):
             await message.channel.send(f'Members have greeted {greet_count} times! 🎉')
     elif message.content.lower() == 'no u' and message.author.id != 789984504839929876:
         await message.channel.send('no u')
+    elif isinstance(message.channel, TextChannel) and message.channel.name == 'announcements' \
+        or message.channel.name == 'hack-announcements':
+            first_line = message.content.partition("\n")[0]
+            first_line = re.sub(r"<.*>", "", first_line) # Attempt to get rid special tokens like emotes, tags etc.
+
+            name = f"Discussion | {first_line}" if len(first_line) > 0 else "Announcement discussion"
+            # Thread names can only be 100 characters long
+            name = (name[:97] + '...') if len(name) > 97 else name
+
+            await message.create_thread(name=name, auto_archive_duration=ANNOUNCEMENT_THREAD_ARCHIVE_DURATION)
     else:
         await reputation.process_cmd(message)
         await hacks_mgmnt.process_cmd(message)

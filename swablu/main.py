@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from swablu.specific import reputation, hacks_mgmnt
+from swablu.specific import reputation, hacks_mgmnt, general_memes
 from swablu.specific.decimeter import schedule_decimeter
 
 logging.basicConfig(
@@ -46,16 +46,20 @@ async def on_member_update(before: Member, after: Member):
 
 @discord_client.event
 async def on_message(message: Message):
-    if isinstance(message.channel, TextChannel) and message.channel.name == 'welcome' and message.content == '🎉?':
-        greet_count = 0
-        async with message.channel.typing():
-            async for message in message.channel.history(limit=None):
-                message: Message
-                greet_count += sum([r.count for r in message.reactions if r.emoji == '🎉'])
-            await message.channel.send(f'Members have greeted {greet_count} times! 🎉')
+    if message.guild.id == DISCORD_GUILD_ID:
+        if isinstance(message.channel, TextChannel) and message.channel.name == 'welcome' and message.content == '🎉?':
+            greet_count = 0
+            async with message.channel.typing():
+                async for message in message.channel.history(limit=None):
+                    message: Message
+                    greet_count += sum([r.count for r in message.reactions if r.emoji == '🎉'])
+                await message.channel.send(f'Members have greeted {greet_count} times! 🎉')
+        else:
+            await reputation.process_cmd(message)
+            await hacks_mgmnt.process_cmd(message)
+            await general_memes.process_cmd(message)
     else:
-        await reputation.process_cmd(message)
-        await hacks_mgmnt.process_cmd(message)
+        await general_memes.process_cmd(message)
 
 
 logger.info('Starting!')

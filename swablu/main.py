@@ -47,7 +47,7 @@ async def on_member_update(before: Member, after: Member):
 
 @discord_client.event
 async def on_message(message: Message):
-    if message.guild.id in DISCORD_GUILD_ID:
+    if message.guild.id in DISCORD_GUILD_IDS:
         if isinstance(message.channel, TextChannel) and message.channel.name == 'welcome' and message.content == '🎉?':
             greet_count = 0
             async with message.channel.typing():

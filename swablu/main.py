@@ -13,7 +13,7 @@ from asyncio import sleep
 from discord import Member, Message, TextChannel
 from tornado.web import Application
 
-from swablu.config import discord_client, PORT, DISCORD_BOT_USER_TOKEN, get_template_dir, DISCORD_GUILD_ID, \
+from swablu.config import discord_client, PORT, DISCORD_BOT_USER_TOKEN, get_template_dir, DISCORD_GUILD_IDS, \
     get_static_dir, COOKIE_SECRET
 from swablu.roles import scan_roles, check_for, get_role
 from swablu.web import routes
@@ -40,13 +40,14 @@ async def on_ready():
 
 @discord_client.event
 async def on_member_update(before: Member, after: Member):
-    if after.guild.id == DISCORD_GUILD_ID:
+    # Only first guild (SkyTemple) supported
+    if after.guild.id == DISCORD_GUILD_IDS[0]:
         await check_for(after, get_role(after.guild))
 
 
 @discord_client.event
 async def on_message(message: Message):
-    if message.guild.id == DISCORD_GUILD_ID:
+    if message.guild.id in DISCORD_GUILD_ID:
         if isinstance(message.channel, TextChannel) and message.channel.name == 'welcome' and message.content == '🎉?':
             greet_count = 0
             async with message.channel.typing():

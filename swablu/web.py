@@ -18,7 +18,7 @@ from mysql.connector import MySQLConnection
 from tornado import httputil
 
 from swablu.config import discord_client, database, AUTHORIZATION_BASE_URL, OAUTH2_REDIRECT_URI, OAUTH2_CLIENT_ID, \
-    OAUTH2_CLIENT_SECRET, TOKEN_URL, API_BASE_URL, DISCORD_GUILD_ID, DISCORD_ADMIN_ROLE, get_rom_hacks, \
+    OAUTH2_CLIENT_SECRET, TOKEN_URL, API_BASE_URL, DISCORD_GUILD_IDS, DISCORD_ADMIN_ROLES, get_rom_hacks, \
     regenerate_htaccess, DISCORD_CHANNEL_HACKS, update_hack, get_rom_hack, get_jam
 from swablu.discord_util import regenerate_message, get_authors
 from swablu.roles import get_hack_type_str
@@ -122,13 +122,14 @@ class AuthenticatedHandler(BaseHandler, ABC):
             self.set_cookie('oauth2_state', state)
             self.redirect(authorization_url, permanent=False)
             return False
-        guild: Guild = discord_client.get_guild(DISCORD_GUILD_ID)
+        # Only first guild (SkyTemple) supported
+        guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
         member: Member = guild.get_member(int(user_id))
         if not member:
             await self.not_authenticated()
             return False
 
-        is_admin = any([r.id == DISCORD_ADMIN_ROLE for r in member.roles])
+        is_admin = any([r.id in DISCORD_ADMIN_ROLES for r in member.roles])
         role_names = [r.name for r in member.roles if r.name.startswith("Hack")]
         if is_admin:
             self.hack_access = get_rom_hacks(self.db)

@@ -2,7 +2,7 @@ from typing import Optional
 
 from discord import Client, TextChannel, Guild
 
-from swablu.config import DISCORD_GUILD_ID
+from swablu.config import DISCORD_GUILD_IDS
 from swablu.roles import get_hack_type_str
 
 
@@ -23,7 +23,8 @@ async def regenerate_message(discord_client: Client, channel_id: int, message_id
 def get_authors(discord_client, rrole: str, as_names=False):
     if rrole == 'Hack: PMD: Fragments' and as_names:
         return 'Irdkwia'
-    guild = discord_client.get_guild(DISCORD_GUILD_ID)
+    # Only first guild (SkyTemple) supported
+    guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
     authors = '???'
     for role in guild.roles:
         if role.name == rrole:

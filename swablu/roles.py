@@ -2,7 +2,7 @@ import logging
 
 from discord import Member, Role, BaseActivity, Guild
 
-from swablu.config import discord_client, DISCORD_GUILD_ID
+from swablu.config import discord_client, DISCORD_GUILD_IDS
 
 skytemple_app_id = 736538698719690814
 role_name = "Using SkyTemple"
@@ -34,7 +34,8 @@ def get_role(guild: Guild):
 
 async def scan_roles():
     logger.info("Periodic scan.")
-    guild: Guild = discord_client.get_guild(DISCORD_GUILD_ID)
+    # Only first guild (SkyTemple) supported
+    guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
     r = get_role(guild)
     for m in guild.members:
         await check_for(m, r)

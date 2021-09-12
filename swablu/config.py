@@ -24,10 +24,10 @@ if 'DISCORD_BOT_USER_TOKEN' not in os.environ:
 DISCORD_BOT_USER_TOKEN = os.environ['DISCORD_BOT_USER_TOKEN']
 if 'DISCORD_GUILD_ID' not in os.environ:
     raise ValueError("No env DISCORD_GUILD_ID.")
-DISCORD_GUILD_ID = int(os.environ['DISCORD_GUILD_ID'])
+DISCORD_GUILD_IDS = [int(x) for x in os.environ['DISCORD_GUILD_ID'].split(',')]
 if 'DISCORD_ADMIN_ROLE' not in os.environ:
     raise ValueError("No env DISCORD_ADMIN_ROLE.")
-DISCORD_ADMIN_ROLE = int(os.environ['DISCORD_ADMIN_ROLE'])
+DISCORD_ADMIN_ROLES = [int(x) for x in os.environ['DISCORD_ADMIN_ROLE'].split(',')]
 if 'DISCORD_CHANNEL_HACKS' not in os.environ:
     raise ValueError("No env DISCORD_CHANNEL_HACKS.")
 DISCORD_CHANNEL_HACKS = int(os.environ['DISCORD_CHANNEL_HACKS'])

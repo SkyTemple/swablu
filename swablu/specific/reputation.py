@@ -7,7 +7,7 @@ import tornado.web
 from discord import Message, TextChannel, User
 from discord.ext.commands import TextChannelConverter, UserConverter
 
-from swablu.config import discord_client, DISCORD_GUILD_ID, database, TABLE_NAME_REPUTATION
+from swablu.config import discord_client, DISCORD_GUILD_IDS, database, TABLE_NAME_REPUTATION
 from swablu.util import MiniCtx
 
 ALLOWED_ROLES = [
@@ -16,6 +16,8 @@ ALLOWED_ROLES = [
     776491019020926976,  # PMDCollab
     712704976752738406,  # ROM Hack Creator
     764601232794058752,  # Sprite Approver
+    # DX server:
+    886168051060445204   # Mod
 ]
 
 AUTHORIZED_DM_USERS = [
@@ -84,7 +86,8 @@ def get_all_guild_points() -> List[Tuple[int, str, int]]:
 async def process_cmd_dm(message: Message):
     cmd_parts = message.content.split(' ')
     channel_converter = TextChannelConverter()
-    ctx = MiniCtx(discord_client.get_guild(DISCORD_GUILD_ID), discord_client, message)
+    # Only first server (SkyTemple) supported.
+    ctx = MiniCtx(discord_client.get_guild(DISCORD_GUILD_IDS[0]), discord_client, message)
     try:
         if not cmd_parts[0].startswith(prefix):
             return

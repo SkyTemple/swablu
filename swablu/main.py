@@ -15,7 +15,8 @@ from tornado.web import Application
 
 from swablu.config import discord_client, PORT, DISCORD_BOT_USER_TOKEN, get_template_dir, DISCORD_GUILD_IDS, \
     get_static_dir, COOKIE_SECRET
-from swablu.roles import scan_roles, check_for, get_role
+from swablu.roles import scan_roles, check_for, get_role, using_skytemple, using_dreamnexus, skytemple_app_id, \
+    dreamnexus_app_id
 from swablu.web import routes
 
 
@@ -40,9 +41,11 @@ async def on_ready():
 
 @discord_client.event
 async def on_member_update(before: Member, after: Member):
-    # Only first guild (SkyTemple) supported
+    # Only first guild (SkyTemple) and second guild (DreamNexus) supported
     if after.guild.id == DISCORD_GUILD_IDS[0]:
-        await check_for(after, get_role(after.guild))
+        await check_for(after, get_role(after.guild, using_skytemple), skytemple_app_id)
+    if after.guild.id == DISCORD_GUILD_IDS[0]:
+        await check_for(after, get_role(after.guild, using_dreamnexus), dreamnexus_app_id)
 
 
 @discord_client.event

@@ -6,6 +6,8 @@ from swablu.config import discord_client, DISCORD_GUILD_IDS
 
 skytemple_app_id = 736538698719690814
 dreamnexus_app_id = 897109434893991976
+using_skytemple = "Using SkyTemple"
+using_dreamnexus = "Using DreamNexus"
 logger = logging.getLogger(__name__)
 
 
@@ -36,11 +38,11 @@ async def scan_roles():
     logger.info("Periodic scan.")
     # Only first guild (SkyTemple) and second guild (DreamNexus) supported
     guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
-    r = get_role(guild, "Using SkyTemple")
+    r = get_role(guild, using_skytemple)
     for m in guild.members:
         await check_for(m, r, skytemple_app_id)
     guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[1])
-    r = get_role(guild, "Using DreamNexus")
+    r = get_role(guild, using_dreamnexus)
     for m in guild.members:
         await check_for(m, r, dreamnexus_app_id)
     logger.info("Periodic scan complete.")

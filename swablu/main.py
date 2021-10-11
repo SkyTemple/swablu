@@ -44,7 +44,7 @@ async def on_member_update(before: Member, after: Member):
     # Only first guild (SkyTemple) and second guild (DreamNexus) supported
     if after.guild.id == DISCORD_GUILD_IDS[0]:
         await check_for(after, get_role(after.guild, using_skytemple), skytemple_app_id)
-    if after.guild.id == DISCORD_GUILD_IDS[0]:
+    if after.guild.id == DISCORD_GUILD_IDS[1]:
         await check_for(after, get_role(after.guild, using_dreamnexus), dreamnexus_app_id)
 
 

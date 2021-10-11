@@ -5,7 +5,7 @@ from discord import Member, Role, BaseActivity, Guild
 from swablu.config import discord_client, DISCORD_GUILD_IDS
 
 skytemple_app_id = 736538698719690814
-dreamnexus_app_id = 897109434893991976
+dreamnexus_app_id = 897159105196736592
 using_skytemple = "Using SkyTemple"
 using_dreamnexus = "Using DreamNexus"
 logger = logging.getLogger(__name__)

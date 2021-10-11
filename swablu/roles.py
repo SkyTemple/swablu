@@ -5,17 +5,17 @@ from discord import Member, Role, BaseActivity, Guild
 from swablu.config import discord_client, DISCORD_GUILD_IDS
 
 skytemple_app_id = 736538698719690814
-role_name = "Using SkyTemple"
+dreamnexus_app_id = 897109434893991976
 logger = logging.getLogger(__name__)
 
 
-async def check_for(member: Member, role: Role):
+async def check_for(member: Member, role: Role, app_id):
     if role is None:
         return
     should = False
     for activity in member.activities:
         activity: BaseActivity
-        if hasattr(activity, 'application_id') and activity.application_id == skytemple_app_id:
+        if hasattr(activity, 'application_id') and activity.application_id == app_id:
             should = True
     logger.info(f'[{member.guild.name}] {member.display_name}? {should}')
     if should and role not in member.roles:
@@ -24,7 +24,7 @@ async def check_for(member: Member, role: Role):
         await member.remove_roles(role)
 
 
-def get_role(guild: Guild):
+def get_role(guild: Guild, role_name: str):
     for candidate in guild.roles:
         candidate: Role
         if candidate.name == role_name:
@@ -34,11 +34,15 @@ def get_role(guild: Guild):
 
 async def scan_roles():
     logger.info("Periodic scan.")
-    # Only first guild (SkyTemple) supported
+    # Only first guild (SkyTemple) and second guild (DreamNexus) supported
     guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
-    r = get_role(guild)
+    r = get_role(guild, "Using SkyTemple")
     for m in guild.members:
-        await check_for(m, r)
+        await check_for(m, r, skytemple_app_id)
+    guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[1])
+    r = get_role(guild, "Using DreamNexus")
+    for m in guild.members:
+        await check_for(m, r, dreamnexus_app_id)
     logger.info("Periodic scan complete.")
 
 

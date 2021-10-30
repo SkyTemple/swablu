@@ -19,7 +19,7 @@ from tornado import httputil
 
 from swablu.config import discord_client, database, AUTHORIZATION_BASE_URL, OAUTH2_REDIRECT_URI, OAUTH2_CLIENT_ID, \
     OAUTH2_CLIENT_SECRET, TOKEN_URL, API_BASE_URL, DISCORD_GUILD_IDS, DISCORD_ADMIN_ROLES, get_rom_hacks, \
-    regenerate_htaccess, DISCORD_CHANNEL_HACKS, update_hack, get_rom_hack, get_jam
+    regenerate_htaccess, DISCORD_CHANNEL_HACKS, update_hack, get_rom_hack, get_jam, vote_jam
 from swablu.discord_util import regenerate_message, get_authors
 from swablu.roles import get_hack_type_str
 from swablu.specific import reputation
@@ -100,6 +100,7 @@ class BaseHandler(tornado.web.RequestHandler, ABC):
 class AuthenticatedHandler(BaseHandler, ABC):
     def __init__(self, application: tornado.web.Application, request: httputil.HTTPServerRequest, **kwargs: any):
         self.hack_access = []
+        self.user_id = None
         super().__init__(application, request, **kwargs)
 
     async def auth(self):
@@ -107,6 +108,7 @@ class AuthenticatedHandler(BaseHandler, ABC):
             discord_session = self.make_session(scope=OAUTH_SCOPE)
             authorization_url, state = discord_session.authorization_url(AUTHORIZATION_BASE_URL)
             self.set_cookie('oauth2_state', state)
+            self.set_secure_cookie('callback_url', self.request.uri)
             self.redirect(authorization_url, permanent=False)
             return False
 
@@ -120,10 +122,12 @@ class AuthenticatedHandler(BaseHandler, ABC):
             discord_session = self.make_session(scope=OAUTH_SCOPE)
             authorization_url, state = discord_session.authorization_url(AUTHORIZATION_BASE_URL)
             self.set_cookie('oauth2_state', state)
+            self.set_secure_cookie('callback_url', self.request.uri)
             self.redirect(authorization_url, permanent=False)
             return False
         # Only first guild (SkyTemple) supported
         guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
+        self.user_id = user_id
         member: Member = guild.get_member(int(user_id))
         if not member:
             await self.not_authenticated()
@@ -162,7 +166,7 @@ class CallbackHandler(BaseHandler):
         session_id = uuid.uuid4().hex
         self.set_secure_cookie('session_id', session_id)
         SessionTokenProvider.set(session_id, token)
-        return self.redirect('/edit')
+        return self.redirect(self.get_secure_cookie('callback_url') if self.get_secure_cookie('callback_url') else '/edit')
 
 
 # noinspection PyAbstractClass
@@ -205,40 +209,76 @@ class JamHandler(BaseHandler):
             logger.warning("Jam error.", exc_info=ex)
 
         if jam is not None:
+            if 'voting_enabled' not in jam:
+                jam['voting_enabled'] = False
             left = list(jam['hacks'].keys())
             winners = []
-            for award, hacks in (jam['awards']['golden'] | jam['awards']['silver'] | jam['awards']['bronze']).items():
-                for hack in hacks:
-                    if hack in left:
-                        winners.append(hack)
-                        left.remove(hack)
+            if 'awards' in jam:
+                for award, hacks in (jam['awards']['golden'] | jam['awards']['silver'] | jam['awards']['bronze']).items():
+                    for hack in hacks:
+                        if hack in left:
+                            winners.append(hack)
+                            left.remove(hack)
             hackdata = {}
             for hack in jam['hacks'].keys():
                 hackdata[hack] = get_rom_hack(self.db, hack)
                 hackdata[hack]['author'] = get_authors(self.discord_client, hackdata[hack]['role_name'], True)
                 hackdata[hack]['description'] = str(hackdata[hack]['description'], 'utf-8').splitlines()
                 hackdata[hack]['awards'] = []
-                for award, hacks in (jam['awards']['golden'] | jam['awards']['silver'] | jam['awards']['bronze']).items():
-                    for ahack in hacks:
-                        if ahack == hack:
-                            hackdata[hack]['awards'].append(award)
+                if 'awards' in jam:
+                    for award, hacks in (jam['awards']['golden'] | jam['awards']['silver'] | jam['awards']['bronze']).items():
+                        for ahack in hacks:
+                            if ahack == hack:
+                                hackdata[hack]['awards'].append(award)
             for dq in jam['dq']:
                 member = discord_client.get_user(int(dq['author']))
                 dq['author'] = f'{member.name}#{member.discriminator}'
             award_groups = {}
-            for award in jam['awards']['golden'].keys():
-                award_groups[award] = 'golden'
-            for award in jam['awards']['silver'].keys():
-                award_groups[award] = 'silver'
-            for award in jam['awards']['bronze'].keys():
-                award_groups[award] = 'bronze'
+            if 'awards' in jam:
+                for award in jam['awards']['golden'].keys():
+                    award_groups[award] = 'golden'
+                for award in jam['awards']['silver'].keys():
+                    award_groups[award] = 'silver'
+                for award in jam['awards']['bronze'].keys():
+                    award_groups[award] = 'bronze'
             shuffle(left)
             await self.render('jam.html',
+                              jam_key=kwargs['jam_key'],
                               title=f'SkyTemple Hack Jam - {jam["motto"]}',
                               jam=jam,
                               winners=winners,
                               others=left,
                               hackdata=hackdata, award_groups=award_groups,
+                              description=jam['description'],
+                              author="SkyTemple Community")
+            return
+        return self.redirect('https://skytemple.org')
+
+
+# noinspection PyAbstractClass
+class JamVoteHandler(AuthenticatedHandler):
+    async def do_get(self, **kwargs):
+        if not await self.auth():
+            return
+        jam = None
+        hack = None
+        try:
+            hack = get_rom_hack(self.db, kwargs['hack_id'])
+            jam = get_jam(self.db, kwargs['jam_key'])
+        except Exception as ex:
+            logger.warning("Jam vote error.", exc_info=ex)
+
+        if jam is not None and 'voting_enabled' in jam and jam['voting_enabled'] and hack is not None:
+            try:
+                vote_jam(self.db, kwargs['jam_key'], self.user_id, kwargs['hack_id'])
+            except:
+                logger.error("Jam vote error.", exc_info=ex)
+                raise
+            await self.render('voted_jam.html',
+                              jam_key=kwargs['jam_key'],
+                              title=f'SkyTemple Hack Jam - {jam["motto"]} - You voted!',
+                              jam=jam,
+                              hack=hack,
                               description=jam['description'],
                               author="SkyTemple Community")
             return
@@ -308,6 +348,7 @@ routes = [
     (r"/callback/?", CallbackHandler, extra),
     (r"/h/(?P<hack_id>[^\/]+)/?", ListingHandler, extra),
     (r"/jam/(?P<jam_key>[^\/]+)/?", JamHandler, extra),
+    (r"/jam/(?P<jam_key>[^\/]+)/vote/(?P<hack_id>[^\/]+)/?", JamVoteHandler, extra),
     (r"/edit/?", EditListHandler, extra),
     (r"/edit/(?P<hack_id>[^\/]+)/?", EditFormHandler, extra),
     (r"/translate_hook", TranslateHookHandler, extra),

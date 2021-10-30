@@ -2,6 +2,11 @@
     <div class="description">
         <h3>{% if key is not None %}<a href="/h/{{ key }}">{% end %}{{ hack["name"] }}{% if key is not None %}</a>{% end %}</h3>
         <div class="author">by {{ hack['author'] }}</div>
+        {% if jam['voting_enabled'] %}
+        <div class="vote-now">
+            <a href="/jam/{{jam_key}}/vote/{{ key }}"><div class="btn" style="background-color: #ffdfdf; border-color: #f00;"><img src="/static/images/logo/vote.png"> VOTE NOW</div></a>
+        </div>
+        {% end %}
         <div class="description">
             <p>{% for line in hack['description'] %}
             {{ line }}<br>

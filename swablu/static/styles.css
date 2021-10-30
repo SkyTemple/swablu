@@ -417,6 +417,10 @@ tbody tr td {
     margin-top: 150px;
 }
 
+.jam-details .hack-content .vote-now {
+    margin-top: 20px;
+}
+
 .jam-details .hack-content .description {
     flex-basis: 70%;
 }

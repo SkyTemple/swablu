@@ -1,0 +1,10 @@
+{% include 'head.html' %}
+<h3>SkyTemple Hack Jam</h3>
+<h1>{{ jam["motto"] }}</h1>
+<div class="jam-details">
+    <div class="jam-description">
+        <p>You successfully voted for <strong>{{ hack["name"] }}</strong>.</p>
+        <p><a href="/jam/{{jam_key}}"><- Return to jam.</a></p>
+    </div>
+</div>
+{% include 'foot.html' %}

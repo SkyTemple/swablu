@@ -6,10 +6,13 @@
         <p>{{ jam ["description"] }}</p>
         <p><strong>Motto: </strong>{{ jam["motto"] }}</p>
         <p><strong>Gimmick: </strong>{{ jam["gimmick"] }}</p>
+        {% if 'awards' in jam %}
         <div class="info">Want to find out more about why we decided how we did?
             Ask the Jury on our <a href="https://discord.gg/skytemple>">Discord</a>! Some of the Jury members also have
             playthroughs on their YouTube channels.</div>
+        {% end %}
     </div>
+    {% if 'awards' in jam %}
     <h2>Winners</h2>
     <div class="hack-list">
         {% for hack_key in winners %}
@@ -19,9 +22,20 @@
             {% include 'jam_hack_content.html' %}
         {% end %}
     </div>
+    {% end %}
     {% if len(others) > 0 %}
+    {% if 'awards' in jam %}
     <h2>Also Winners :)</h2>
     <p class="sub">{{ jam['other_text'] }}</p>
+    {% else %}
+    <h2>Submissions</h2>
+        {% if jam['voting_enabled'] %}
+        <p class="sub">You can now vote for your favorite ROM Hack. You will need a Discord account. Each user can only vote once,
+            if you try to vote a second time, this will change your vote.</p>
+        {% else %}
+        <p class="sub">Results will be published here soon!</p>
+        {% end %}
+    {% end %}
     <div class="hack-list">
         {% for hack_key in others %}
             {% set hack = hackdata[hack_key] %}

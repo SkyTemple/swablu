@@ -16,6 +16,7 @@ discord_client = discord.Client(intents=intents)
 TABLE_NAME = 'rom_hacks'
 TABLE_NAME_REPUTATION = 'rep'
 TABLE_NAME_JAM = 'jam'
+TABLE_NAME_JAM_VOTES = 'jam_votes'
 logger = logging.getLogger(__name__)
 
 
@@ -104,6 +105,16 @@ def get_jam(dbcon, key):
     dbcon.commit()
     cursor.close()
     return json.loads(d['config'])
+
+
+def vote_jam(dbcon, jam_key, user_id, hack):
+    cursor = dbcon.cursor()
+    sql = f"INSERT INTO {TABLE_NAME_JAM_VOTES} (user_id, jam, hack) VALUES(%s, %s, %s) ON DUPLICATE KEY UPDATE hack=%s"
+    cursor.execute(sql, (
+        user_id, jam_key, hack, hack
+    ))
+    dbcon.commit()
+    cursor.close()
 
 
 def update_hack(dbcon, hack):
@@ -213,7 +224,20 @@ if not check_table_exists(database, TABLE_NAME_JAM):
 else:
     logger.info("Jam table existed!")
 
-
+if not check_table_exists(database, TABLE_NAME_JAM_VOTES):
+    dbcur = database.cursor()
+    logger.info("Creating jam votes table...")
+    dbcur.execute(f"""
+    CREATE TABLE `{TABLE_NAME_JAM_VOTES}` (
+        `user_id` BIGINT(30) unsigned,
+        `jam` VARCHAR(80) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+        `hack` VARCHAR(80) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+        PRIMARY KEY (`user_id`, `jam`)
+    );
+    """)
+    dbcur.close()
+else:
+    logger.info("Jam votes table existed!")
 
 API_BASE_URL ='https://discordapp.com/api'
 AUTHORIZATION_BASE_URL = API_BASE_URL + '/oauth2/authorize'

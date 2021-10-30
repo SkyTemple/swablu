@@ -263,8 +263,8 @@ class JamHandler(BaseHandler):
 # noinspection PyAbstractClass
 class JamVoteHandler(AuthenticatedHandler):
     def __init__(self, application: tornado.web.Application, request: httputil.HTTPServerRequest, **kwargs: any):
-        self._allow_auth_without_hacks = True
         super().__init__(application, request, **kwargs)
+        self._allow_auth_without_hacks = True
 
     async def do_get(self, **kwargs):
         jam = None

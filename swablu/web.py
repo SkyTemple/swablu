@@ -56,10 +56,11 @@ class BaseHandler(tornado.web.RequestHandler, ABC):
     def initialize(self, discord_client: Client, db: MySQLConnection):
         self.discord_client: Client = discord_client
         self.db: MySQLConnection = db
+        self._allow_auth_without_hacks = False
 
     async def get(self, *args, **kwargs):
         try:
-            if await self.auth():
+            if await self.auth(self._allow_auth_without_hacks):
                 await self.do_get(*args, **kwargs)
         except Exception as err:
             self.set_status(500)
@@ -261,9 +262,11 @@ class JamHandler(BaseHandler):
 
 # noinspection PyAbstractClass
 class JamVoteHandler(AuthenticatedHandler):
+    def __init__(self, application: tornado.web.Application, request: httputil.HTTPServerRequest, **kwargs: any):
+        self._allow_auth_without_hacks = True
+        super().__init__(application, request, **kwargs)
+
     async def do_get(self, **kwargs):
-        if not await self.auth(True):
-            return
         jam = None
         hack = None
         try:

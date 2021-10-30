@@ -262,7 +262,7 @@ class JamHandler(BaseHandler):
 # noinspection PyAbstractClass
 class JamVoteHandler(AuthenticatedHandler):
     async def do_get(self, **kwargs):
-        if not await self.auth():
+        if not await self.auth(True):
             return
         jam = None
         hack = None

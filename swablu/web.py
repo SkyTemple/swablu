@@ -71,7 +71,7 @@ class BaseHandler(tornado.web.RequestHandler, ABC):
     async def do_get(self, *args, **kwargs):
         pass
 
-    async def auth(self):
+    async def auth(self, ignore_no_hacks=False):
         return True
 
     async def prepare(self):
@@ -103,7 +103,7 @@ class AuthenticatedHandler(BaseHandler, ABC):
         self.user_id = None
         super().__init__(application, request, **kwargs)
 
-    async def auth(self):
+    async def auth(self, ignore_no_hacks=False):
         if not self.get_secure_cookie('session_id'):
             discord_session = self.make_session(scope=OAUTH_SCOPE)
             authorization_url, state = discord_session.authorization_url(AUTHORIZATION_BASE_URL)
@@ -130,6 +130,8 @@ class AuthenticatedHandler(BaseHandler, ABC):
         self.user_id = user_id
         member: Member = guild.get_member(int(user_id))
         if not member:
+            if ignore_no_hacks:
+                return True
             await self.not_authenticated()
             return False
 
@@ -140,6 +142,8 @@ class AuthenticatedHandler(BaseHandler, ABC):
         else:
             self.hack_access = get_rom_hacks(self.db, role_names)
         if len(self.hack_access) < 1:
+            if ignore_no_hacks:
+                return True
             await self.not_authenticated()
             return False
         return True

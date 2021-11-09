@@ -19,6 +19,7 @@ services:
       BASE_URL: "..."
       COOKIE_SECRET: "..."
       PORT: 30321
+      ENABLE_DISCORD_WRITES: "1"
     ports:
       - 30321:30321
     depends_on:

@@ -2,7 +2,7 @@ import logging
 
 from discord import Member, Role, BaseActivity, Guild
 
-from swablu.config import discord_client, DISCORD_GUILD_IDS
+from swablu.config import discord_client, DISCORD_GUILD_IDS, discord_writes_enabled
 
 skytemple_app_id = 736538698719690814
 dreamnexus_app_id = 897159105196736592
@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 async def check_for(member: Member, role: Role, app_id):
+    if not discord_writes_enabled():
+        return
     if role is None:
         return
     should = False

@@ -4,7 +4,7 @@ from random import randrange
 
 from discord import Guild, TextChannel, Role, Colour
 
-from swablu.config import discord_client, DISCORD_GUILD_IDS
+from swablu.config import discord_client, DISCORD_GUILD_IDS, discord_writes_enabled
 
 MIN_TIME = 720  # min
 MAX_TIME = 17280  # min
@@ -17,6 +17,8 @@ CHANNEL_ID = 804426600569503815
 
 
 async def schedule_decimeter():
+    if not discord_writes_enabled():
+        return
     first = True
     while True:
         if first:

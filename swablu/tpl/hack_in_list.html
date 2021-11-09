@@ -1,8 +1,19 @@
-<div class="hack-content">
+<div class="hack-content" id="hack-{{ key }}" data-name="{{ hack['name'] }}" data-type="{{ hack['hack_type'] if 'hack_type' in hack else '' }}">
     <div class="description">
         <h3>{% if key is not None %}<a href="/h/{{ key }}">{% end %}{{ hack["name"] }}{% if key is not None %}</a>{% end %}</h3>
         <div class="author">by {{ hack['author'] }}</div>
-        {% if jam['voting_enabled'] %}
+        {% if 'hack_type_printable' in hack %}
+        <dl>
+            <dt>Hack Type:</dt>
+            <dd>{{ hack['hack_type_printable'] }}</dd>
+        </dl>
+        {% end %}
+        {% if 'featured_jams' in hack %}
+            {% for fjam in hack['featured_jams'] %}
+                <div class="featured feat-{{fjam['award']}}"><span>Featured in <a href="/jam/{{fjam['key']}}">"{{fjam['name']}}" Hack Jam</a>.</span></div>
+            {% end %}
+        {% end %}
+        {% if jam and jam['voting_enabled'] %}
         <div class="vote-now">
             <a href="/jam/{{jam_key}}/vote/{{ key }}"><div class="btn" style="background-color: #ffdfdf; border-color: #f00;"><img src="/static/images/logo/vote.png"> VOTE NOW</div></a>
         </div>
@@ -40,10 +51,6 @@
         </div>
     </div>
     <div class="judgement">
-        <!--<figure class="jury">
-            <blockquote>{{ jury }}</blockquote>
-            <figcaption>The Jury</figcaption>
-        </figure>-->
         {% if 'awards' in hack and len(hack['awards']) > 0 %}
         <div class="awards">
             <h4>Awards</h4>

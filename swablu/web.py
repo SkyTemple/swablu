@@ -19,7 +19,8 @@ from tornado import httputil
 
 from swablu.config import discord_client, database, AUTHORIZATION_BASE_URL, OAUTH2_REDIRECT_URI, OAUTH2_CLIENT_ID, \
     OAUTH2_CLIENT_SECRET, TOKEN_URL, API_BASE_URL, DISCORD_GUILD_IDS, DISCORD_ADMIN_ROLES, get_rom_hacks, \
-    regenerate_htaccess, DISCORD_CHANNEL_HACKS, update_hack, get_rom_hack, get_jam, vote_jam
+    regenerate_htaccess, DISCORD_CHANNEL_HACKS, update_hack, get_rom_hack, get_jam, vote_jam, discord_writes_enabled, \
+    get_jams
 from swablu.discord_util import regenerate_message, get_authors
 from swablu.roles import get_hack_type_str
 from swablu.specific import reputation
@@ -186,14 +187,53 @@ class EditListHandler(AuthenticatedHandler):
 
 
 # noinspection PyAbstractClass
-class ListingHandler(BaseHandler):
+class ListHandler(BaseHandler):
+    async def do_get(self, **kwargs):
+        jams = get_jams(self.db)
+        hacks_pre = get_rom_hacks(self.db, sorted=True)
+        hacks = []
+        for h in hacks_pre:
+            if h['message_id'] is None:
+                continue
+            h['author'] = get_authors(self.discord_client, h['role_name'], True)
+            h['description'] = str(h['description'], 'utf-8').splitlines()
+            h['hack_type_printable'] = get_hack_type_str(h["hack_type"])
+            h['featured_jams'] = []
+            for jam in jams:
+                if h['key'] in jam['hacks'].keys():
+                    h['featured_jams'].append({
+                        'key': jam['key'],
+                        'name': jam['motto'],
+                        'award': 'none' if 'awards' not in jam else self._get_award(h['key'], jam['awards'])
+                    })
+            hacks.append(h)
+        await self.render('list.html',
+                          title=f'SkyTemple Hack Directory',
+                          hacks=hacks,
+                          **DEFAULT_AUTHOR_DESCRIPTION)
+
+    @staticmethod
+    def _get_award(key, awards):
+        for x in awards['golden'].values():
+            if key in x:
+                return 'golden'
+        for x in awards['silver'].values():
+            if key in x:
+                return 'silver'
+        for x in awards['bronze'].values():
+            if key in x:
+                return 'bronze'
+        return 'none'
+
+# noinspection PyAbstractClass
+class HackEntryHandler(BaseHandler):
     async def do_get(self, **kwargs):
         hack = get_rom_hack(self.db, kwargs['hack_id'])
         if hack and hack['message_id']:
             authors = get_authors(self.discord_client, hack['role_name'], True)
             desc = str(hack['description'], 'utf-8')
             description_lines = desc.splitlines()
-            await self.render('listing.html',
+            await self.render('hack_entry.html',
                               title=f'{hack["name"]} - SkyTemple Hack Directory',
                               hack=hack,
                               description=hack["description"],
@@ -327,8 +367,9 @@ class EditFormHandler(AuthenticatedHandler):
         if m:
             hack['video'] = m.group(7)
 
-        hack['message_id'] = await regenerate_message(self.discord_client, DISCORD_CHANNEL_HACKS,
-                                                      int(hack['message_id']) if hack['message_id'] else None, hack)
+        if discord_writes_enabled():
+            hack['message_id'] = await regenerate_message(self.discord_client, DISCORD_CHANNEL_HACKS,
+                                                          int(hack['message_id']) if hack['message_id'] else None, hack)
         update_hack(self.db, hack)
         regenerate_htaccess()
         return self.redirect(f'/edit/{hack_id}?saved=1')
@@ -351,9 +392,9 @@ extra = {
 }
 
 routes = [
-    (r"/", EditListHandler, extra),
+    (r"/", ListHandler, extra),
     (r"/callback/?", CallbackHandler, extra),
-    (r"/h/(?P<hack_id>[^\/]+)/?", ListingHandler, extra),
+    (r"/h/(?P<hack_id>[^\/]+)/?", HackEntryHandler, extra),
     (r"/jam/(?P<jam_key>[^\/]+)/?", JamHandler, extra),
     (r"/jam/(?P<jam_key>[^\/]+)/vote/(?P<hack_id>[^\/]+)/?", JamVoteHandler, extra),
     (r"/edit/?", EditListHandler, extra),

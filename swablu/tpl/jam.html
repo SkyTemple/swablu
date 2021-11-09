@@ -1,7 +1,7 @@
 {% include 'head.html' %}
 <h3>SkyTemple Hack Jam</h3>
 <h1>{{ jam["motto"] }}</h1>
-<div class="jam-details">
+<div class="hack-listing jam-details">
     <div class="jam-description">
         <p>{{ jam ["description"] }}</p>
         <p><strong>Motto: </strong>{{ jam["motto"] }}</p>
@@ -19,7 +19,7 @@
             {% set hack = hackdata[hack_key] %}
             {% set key = hack_key %}
             {% set jury = jam['hacks'][hack_key] %}
-            {% include 'jam_hack_content.html' %}
+            {% include 'hack_in_list.html' %}
         {% end %}
     </div>
     {% end %}
@@ -41,7 +41,7 @@
             {% set hack = hackdata[hack_key] %}
             {% set key = hack_key %}
             {% set jury = jam['hacks'][hack_key] %}
-            {% include 'jam_hack_content.html' %}
+            {% include 'hack_in_list.html' %}
         {% end %}
     </div>
     {% end %}
@@ -53,7 +53,7 @@
             {% set hack = hack_data %}
             {% set key = None %}
             {% set jury = hack_data['jury'] %}
-            {% include 'jam_hack_content.html' %}
+            {% include 'hack_in_list.html' %}
         {% end %}
     </div>
     {% end %}

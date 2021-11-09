@@ -1,0 +1,35 @@
+{% include 'head.html' %}
+<h1>ROM Hacks</h1>
+<div class="toolbar">
+    <p class="lead">On this site you can find a list of all ROM Hacks for PMD Explorers of Sky.</p>
+    <h3>Filter</h3>
+    <form id="filter-form">
+        <label>Name: <input name="name" type="text"></label>
+        <label>Type: <select name="type">
+              <option value="">---</option>
+              <option value="balance_hack">Balance Hack</option>
+              <option value="story_hack">Story Hack</option>
+              <option value="translation">Translation</option>
+              <option value="misc_hack">Misc. Hack</option>
+              <option value="machinima">Machinima</option>
+        </select></label>
+        <label>Status: <select name="status">
+              <option value="">---</option>
+              <option value="wip">Work in Progress</option>
+              <option value="demo">With Demo / Ongoing</option>
+              <option value="mostly">Mostly Finished / Ongoing</option>
+              <option value="finished">Finished</option>
+        </select></label>
+    </form>
+    <script src="/static/filter.js"></script>
+</div>
+<div class="hack-listing">
+    <div class="hack-list">
+        {% set jam = None %}
+        {% for hack in hacks %}
+            {% set key = hack['key'] %}
+            {% include 'hack_in_list.html' %}
+        {% end %}
+    </div>
+</div>
+{% include 'foot.html' %}

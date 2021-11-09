@@ -67,10 +67,12 @@ def check_table_exists(dbcon, tablename):
         return True
 
 
-def get_rom_hacks(dbcon, filter=None):
+def get_rom_hacks(dbcon, filter=None, sorted=False):
     cursor = dbcon.cursor(dictionary=True, buffered=True)
     if filter is None:
         sql = f"SELECT * FROM `{TABLE_NAME}`"
+        if sorted:
+            sql += f" ORDER BY date_updated DESC, name ASC"
         cursor.execute(sql)
     else:
         if len(filter) < 1:
@@ -78,6 +80,8 @@ def get_rom_hacks(dbcon, filter=None):
             return []
         format_strings = ','.join(['%s'] * len(filter))
         sql = f"SELECT * FROM `{TABLE_NAME}` WHERE role_name IN (%s)"
+        if sorted:
+            sql += f" ORDER BY date_updated DESC, name DESC"
         cursor.execute(sql % format_strings, tuple(filter))
     d = []
     for k in cursor.fetchall():
@@ -95,6 +99,20 @@ def get_rom_hack(dbcon, key):
     dbcon.commit()
     cursor.close()
     return d
+
+
+def get_jams(dbcon):
+    cursor = dbcon.cursor(dictionary=True, buffered=True)
+    sql = f"SELECT * FROM `{TABLE_NAME_JAM}`"
+    cursor.execute(sql)
+    rows = []
+    for k in cursor.fetchall():
+        d = json.loads(k['config'])
+        d['key'] = k['key']
+        rows.append(d)
+    dbcon.commit()
+    cursor.close()
+    return rows
 
 
 def get_jam(dbcon, key):
@@ -129,7 +147,8 @@ def update_hack(dbcon, hack):
           f"`url_download` = %s," \
           f"`video` = %s," \
           f"`hack_type` = %s," \
-          f"`message_id` = %s" \
+          f"`message_id` = %s," \
+          f"`date_updated` = NOW()" \
           f" WHERE id = %s"
     cursor.execute(sql, (
         hack['name'],
@@ -245,6 +264,10 @@ TOKEN_URL = API_BASE_URL + '/oauth2/token'
 
 
 regenerate_htaccess()
+
+
+def discord_writes_enabled():
+    return bool(int(os.getenv('ENABLE_DISCORD_WRITES', "0")))
 
 
 def get_template_dir():

@@ -20,7 +20,7 @@ from tornado import httputil
 from swablu.config import discord_client, database, AUTHORIZATION_BASE_URL, OAUTH2_REDIRECT_URI, OAUTH2_CLIENT_ID, \
     OAUTH2_CLIENT_SECRET, TOKEN_URL, API_BASE_URL, DISCORD_GUILD_IDS, DISCORD_ADMIN_ROLES, get_rom_hacks, \
     regenerate_htaccess, DISCORD_CHANNEL_HACKS, update_hack, get_rom_hack, get_jam, vote_jam, discord_writes_enabled, \
-    get_jams
+    get_jams, get_rom_hack_img
 from swablu.discord_util import regenerate_message, get_authors
 from swablu.roles import get_hack_type_str
 from swablu.specific import reputation
@@ -199,6 +199,7 @@ class ListHandler(BaseHandler):
             h['description'] = str(h['description'], 'utf-8').splitlines()
             h['hack_type_printable'] = get_hack_type_str(h["hack_type"])
             h['featured_jams'] = []
+            h['video'] = None  # don't show videos on the list.
             for jam in jams:
                 if h['key'] in jam['hacks'].keys():
                     h['featured_jams'].append({
@@ -242,6 +243,19 @@ class HackEntryHandler(BaseHandler):
                               description_lines=description_lines)
             return
         return self.redirect('https://skytemple.org')
+
+
+# noinspection PyAbstractClass
+class HackImageHandler(BaseHandler):
+    async def do_get(self, **kwargs):
+        hack_img = get_rom_hack_img(self.db, kwargs['hack_id'], kwargs['img_id'])
+        if hack_img is not None:
+            prefix, data = hack_img.split(',')
+            self.set_header('Content-Type', prefix.split(':')[1].split(';')[0])
+            self.write(base64.b64decode(data))
+            return
+        self.write('404: Not Found')
+        self.set_status(404, 'Not Found')
 
 
 # noinspection PyAbstractClass
@@ -395,6 +409,7 @@ routes = [
     (r"/", ListHandler, extra),
     (r"/callback/?", CallbackHandler, extra),
     (r"/h/(?P<hack_id>[^\/]+)/?", HackEntryHandler, extra),
+    (r"/himg/(?P<hack_id>[^\/]+)/(?P<img_id>\d).png", HackImageHandler, extra),
     (r"/jam/(?P<jam_key>[^\/]+)/?", JamHandler, extra),
     (r"/jam/(?P<jam_key>[^\/]+)/vote/(?P<hack_id>[^\/]+)/?", JamVoteHandler, extra),
     (r"/edit/?", EditListHandler, extra),

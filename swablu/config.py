@@ -101,6 +101,25 @@ def get_rom_hack(dbcon, key):
     return d
 
 
+def get_rom_hack_img(dbcon, key, id):
+    field = None
+    if int(id) == 1:
+        field = 'screenshot1'
+    elif int(id) == 2:
+        field = 'screenshot2'
+    if field:
+        cursor = dbcon.cursor(dictionary=True, buffered=True)
+        sql = f"SELECT `{field}` FROM `{TABLE_NAME}` WHERE `key` = %s"
+        cursor.execute(sql, (key,))
+        d = cursor.fetchone()
+        dbcon.commit()
+        cursor.close()
+        v = d[field]
+        if v != 'None':
+            return v
+    return None
+
+
 def get_jams(dbcon):
     cursor = dbcon.cursor(dictionary=True, buffered=True)
     sql = f"SELECT * FROM `{TABLE_NAME_JAM}`"

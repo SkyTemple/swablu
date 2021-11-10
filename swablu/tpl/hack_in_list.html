@@ -1,53 +1,57 @@
-<div class="hack-content" id="hack-{{ key }}" data-name="{{ hack['name'] }}" data-type="{{ hack['hack_type'] if 'hack_type' in hack else '' }}">
+<div class="hack-content" id="hack-{{ key }}" data-sortidx="{{ sort_idx }}" data-name="{{ hack['name'].replace('Pokemon Mystery Dungeon', '').replace('Pokémon Mystery Dungeon', '').replace('PMD', '').strip(':').strip() }}" data-type="{{ hack['hack_type'] if 'hack_type' in hack else '' }}">
     <div class="description">
-        <h3>{% if key is not None %}<a href="/h/{{ key }}">{% end %}{{ hack["name"] }}{% if key is not None %}</a>{% end %}</h3>
-        <div class="author">by {{ hack['author'] }}</div>
-        {% if 'hack_type_printable' in hack %}
-        <dl>
-            <dt>Hack Type:</dt>
-            <dd>{{ hack['hack_type_printable'] }}</dd>
-        </dl>
+        <div class="metadata">
+            <h3>{% if key is not None %}<a href="/h/{{ key }}">{% end %}{% raw hack['name'].replace('PMD', '<span class="sm">PMD</span>').replace('Pokemon Mystery Dungeon', '<span class="sm">PMD</span>').replace('Pokémon Mystery Dungeon', '<span class="sm">PMD</span>') %}{% if key is not None %}</a>{% end %}</h3>
+            <div class="author">by {{ hack['author'] }}</div>
+            {% if 'hack_type_printable' in hack %}
+            <dl>
+                <dt>Hack Type:</dt>
+                <dd>{{ hack['hack_type_printable'] }}</dd>
+            </dl>
         {% end %}
-        {% if 'featured_jams' in hack %}
-            {% for fjam in hack['featured_jams'] %}
-                <div class="featured feat-{{fjam['award']}}"><span>Featured in <a href="/jam/{{fjam['key']}}">"{{fjam['name']}}" Hack Jam</a>.</span></div>
-            {% end %}
-        {% end %}
-        {% if jam and jam['voting_enabled'] %}
-        <div class="vote-now">
-            <a href="/jam/{{jam_key}}/vote/{{ key }}"><div class="btn" style="background-color: #ffdfdf; border-color: #f00;"><img src="/static/images/logo/vote.png"> VOTE NOW</div></a>
         </div>
-        {% end %}
-        <div class="description">
-            <p>{% for line in hack['description'] %}
-            {{ line }}<br>
-            {% end %}</p>
-        </div>
-        <div class="links">
-            {% if hack['url_main'] %}
-                <a href="{{ hack['url_main'] }}"><div class="btn" style="background-color: #f5e1dc; border-color: #f56b47;"><img src="/static/images/logo/info.png"> Info</div></a>
+        <div class="inner-content">
+            {% if 'featured_jams' in hack %}
+                {% for fjam in hack['featured_jams'] %}
+                    <div class="featured feat-{{fjam['award']}}"><span>Featured in <a href="/jam/{{fjam['key']}}">"{{fjam['name']}}" Hack Jam</a>.</span></div>
+                {% end %}
             {% end %}
-            {% if hack['url_download'] %}
-                <a href="{{ hack['url_download'] }}"><div class="btn" style="background-color: #daf2de; border-color: #2e8a40;"><img src="/static/images/logo/download.png"> Download</div></a>
+            {% if jam and jam['voting_enabled'] %}
+            <div class="vote-now">
+                <a href="/jam/{{jam_key}}/vote/{{ key }}"><div class="btn" style="background-color: #ffdfdf; border-color: #f00;"><img src="/static/images/logo/vote.png"> VOTE NOW</div></a>
+            </div>
             {% end %}
-            {% if hack['url_discord'] %}
-                <a href="{{ hack['url_discord'] }}"><div class="btn" style="background-color: #dae0f2; border-color: #647eca;"><img src="/static/images/logo/discord.png"> Discord</div></a>
-            {% end %}
-        </div>
-        <div class="gallery {% if not hack['video'] %}two-items{% end %}">
-            {% if hack['video'] %}
-                <div><div class="video-container">
-                    <iframe src="https://www.youtube.com/embed/{{hack['video']}}"
-                            frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen></iframe>
-                </div></div>
-            {% end %}
-            {% if hack['screenshot1'] is not None and hack['screenshot1'] != 'None' %}
-                <div><div class="screenshot"><img src="{{ hack['screenshot1'] }}"></div></div>
-            {% end %}
-            {% if hack['screenshot2'] is not None and hack['screenshot2'] != 'None' %}
-                <div><div class="screenshot"><img src="{{ hack['screenshot2'] }}"></div></div>
-            {% end %}
+            <div class="description-text">
+                <p>{% for line in hack['description'] %}
+                {{ line }}<br>
+                {% end %}</p>
+            </div>
+            <div class="links">
+                {% if hack['url_main'] %}
+                    <a href="{{ hack['url_main'] }}"><div class="btn" style="background-color: #f5e1dc; border-color: #f56b47;"><img src="/static/images/logo/info.png"> Info</div></a>
+                {% end %}
+                {% if hack['url_download'] %}
+                    <a href="{{ hack['url_download'] }}"><div class="btn" style="background-color: #daf2de; border-color: #2e8a40;"><img src="/static/images/logo/download.png"> Download</div></a>
+                {% end %}
+                {% if hack['url_discord'] %}
+                    <a href="{{ hack['url_discord'] }}"><div class="btn" style="background-color: #dae0f2; border-color: #647eca;"><img src="/static/images/logo/discord.png"> Discord</div></a>
+                {% end %}
+            </div>
+            <div class="gallery {% if not hack['video'] %}two-items{% end %}">
+                {% if hack['video'] %}
+                    <div><div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/{{hack['video']}}"
+                                frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen></iframe>
+                    </div></div>
+                {% end %}
+                {% if hack['screenshot1'] is not None and hack['screenshot1'] != 'None' %}
+                    <div><div class="screenshot"><a href="/h/{{ key }}"><img loading="lazy" src="/himg/{{ key }}/1.png"></a></div></div>
+                {% end %}
+                {% if hack['screenshot2'] is not None and hack['screenshot2'] != 'None' %}
+                    <div><div class="screenshot"><a href="/h/{{ key }}"><img loading="lazy" src="/himg/{{ key }}/2.png"></a></div></div>
+                {% end %}
+            </div>
         </div>
     </div>
     <div class="judgement">

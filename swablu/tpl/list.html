@@ -20,16 +20,30 @@
               <option value="mostly">Mostly Finished / Ongoing</option>
               <option value="finished">Finished</option>
         </select></label>
+        <label>Sort by: <select name="sort">
+              <option value="updated">Last updated</option>
+              <option value="abc">Alphabetical</option>
+        </select></label>
+        <label class="hide-mobile">View mode: <select name="view">
+              <option value="compact">Compact</option>
+              <option value="details">Details</option>
+        </select></label>
     </form>
-    <script src="/static/filter.js"></script>
 </div>
 <div class="hack-listing">
     <div class="hack-list">
+
+    </div>
+    <div class="error">
+        There was an error loading the list of hacks, or you have JavaScript disabled.
+    </div>
+    <div class="tmpl-hack-list" style="display: none;">
         {% set jam = None %}
-        {% for hack in hacks %}
+        {% for sort_idx, hack in enumerate(hacks) %}
             {% set key = hack['key'] %}
             {% include 'hack_in_list.html' %}
         {% end %}
     </div>
 </div>
+<script src="/static/filter.js?v=2"></script>
 {% include 'foot.html' %}

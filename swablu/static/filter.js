@@ -4,6 +4,10 @@ var inpName = document.querySelector('#filter-form [name=name]');
 var selType = document.querySelector('#filter-form [name=type]');
 /** @type {HTMLSelectElement} */
 var selStatus = document.querySelector('#filter-form [name=status]');
+/** @type {HTMLSelectElement} */
+var selSort = document.querySelector('#filter-form [name=sort]');
+/** @type {HTMLSelectElement} */
+var selView = document.querySelector('#filter-form [name=view]');
 
 function _keep(a, b) {
     var i, item;
@@ -58,30 +62,42 @@ function refilter() {
             break;
     }
     var name = inpName.value.trim().toLowerCase();
-    console.log(name, hack_types);
 
-    document.querySelectorAll('.hack-list .hack-content').forEach(function (div) {
+    var list = document.querySelector('.hack-list');
+    while (list.lastElementChild) {
+        list.removeChild(list.lastElementChild);
+    }
+    var containerToAddTo = list;
+    if (selSort.value === 'abc') {
+        containerToAddTo = [];
+        containerToAddTo.append = containerToAddTo.push;
+    }
+    if (selView.value === 'compact') {
+        list.classList.add('mode-compact');
+    } else {
+        list.classList.remove('mode-compact');
+    }
+    document.querySelectorAll('.tmpl-hack-list .hack-content').forEach(function (div) {
         var shouldShow = true;
         if (name !== "") {
             shouldShow = div.getAttribute('data-name').toLowerCase().includes(name);
         }
         shouldShow &&= hack_types.includes(div.getAttribute('data-type'));
         if (shouldShow) {
-            div.style.display = 'block';
-        } else {
-            div.style.display = 'none';
+            containerToAddTo.append(div.cloneNode(true));
         }
     })
+    if (selSort.value === 'abc') {
+        containerToAddTo
+            .sort(function(a, b) {return a.getAttribute('data-name') < b.getAttribute('data-name') ? -1 : 1;})
+            .forEach(function(ele) {list.append(ele);});
+    }
+    document.querySelector('.error').style.display = 'none';
 }
 
-inpName.oninput = function() {
-    refilter();
-}
-
-selType.onchange = function() {
-    refilter();
-}
-
-selStatus.onchange = function() {
-    refilter();
-}
+inpName.oninput = refilter
+selType.onchange = refilter
+selStatus.onchange = refilter
+selSort.onchange = refilter
+selView.onchange = refilter
+refilter();

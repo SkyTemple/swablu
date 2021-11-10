@@ -6,7 +6,10 @@ import re
 import traceback
 import uuid
 from abc import abstractmethod, ABC
+from asyncio import Future
+from http.client import HTTPConnection
 from random import shuffle
+from typing import Optional, Union
 
 import tornado.web
 import os
@@ -37,6 +40,20 @@ if 'http://' in OAUTH2_REDIRECT_URI:
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
 logger = logging.getLogger(__name__)
 
+
+def invalidate_cache(cache_tags):
+    # noinspection PyTypeChecker
+    try:
+        c = HTTPConnection('varnish')
+        c.putrequest('PURGE', '/', skip_host=True)
+        c.putheader('xkey-purge', ' '.join(cache_tags))
+        c.endheaders()
+        c.send('')
+        c.getresponse()
+    except OSError as ex:
+        logger.warning(f'Could not clear cache ({cache_tags}): {ex}')
+    else:
+        logger.info(f'Cleared cache ({cache_tags})')
 
 class SessionTokenProvider:
     tokens = {}
@@ -96,6 +113,27 @@ class BaseHandler(tornado.web.RequestHandler, ABC):
             auto_refresh_url=TOKEN_URL,
             token_updater=self.token_updater
         )
+
+
+class CacheableHandler(BaseHandler, ABC):
+    def __init__(self, application: tornado.web.Application, request: httputil.HTTPServerRequest, **kwargs: any):
+        self.cacheable = True
+        self.cache_tags = []
+        super().__init__(application, request, **kwargs)
+
+    def set_status(self, status_code: int, reason: Optional[str] = None) -> None:
+        if str(status_code)[0] != 2:
+            self.cacheable = False
+        super().set_status(status_code, reason)
+
+    def finish(self, chunk: Optional[Union[str, bytes, dict]] = None) -> "Future[None]":
+        if self._finished:
+            raise RuntimeError("finish() called twice")
+        if self.cacheable and len(self.cache_tags) > 0:
+            self.set_header('Cache-Control', 'public, max-age=600, must-revalidate')
+            for cache_tag in self.cache_tags:
+                self.add_header('xkey', cache_tag)
+        return super().finish(chunk)
 
 
 # noinspection PyAbstractClass
@@ -187,11 +225,12 @@ class EditListHandler(AuthenticatedHandler):
 
 
 # noinspection PyAbstractClass
-class ListHandler(BaseHandler):
+class ListHandler(CacheableHandler):
     async def do_get(self, **kwargs):
         jams = get_jams(self.db)
         hacks_pre = get_rom_hacks(self.db, sorted=True)
         hacks = []
+        self.cache_tags.append(f'hack')
         for h in hacks_pre:
             if h['message_id'] is None:
                 continue
@@ -226,11 +265,13 @@ class ListHandler(BaseHandler):
                 return 'bronze'
         return 'none'
 
+
 # noinspection PyAbstractClass
-class HackEntryHandler(BaseHandler):
+class HackEntryHandler(CacheableHandler):
     async def do_get(self, **kwargs):
         hack = get_rom_hack(self.db, kwargs['hack_id'])
         if hack and hack['message_id']:
+            self.cache_tags.append(f'hack-{hack["key"]}')
             authors = get_authors(self.discord_client, hack['role_name'], True)
             desc = str(hack['description'], 'utf-8')
             description_lines = desc.splitlines()
@@ -246,10 +287,11 @@ class HackEntryHandler(BaseHandler):
 
 
 # noinspection PyAbstractClass
-class HackImageHandler(BaseHandler):
+class HackImageHandler(CacheableHandler):
     async def do_get(self, **kwargs):
         hack_img = get_rom_hack_img(self.db, kwargs['hack_id'], kwargs['img_id'])
         if hack_img is not None:
+            self.cache_tags.append(f'hack-{kwargs["hack_id"]}')
             prefix, data = hack_img.split(',')
             self.set_header('Content-Type', prefix.split(':')[1].split(';')[0])
             self.write(base64.b64decode(data))
@@ -259,7 +301,7 @@ class HackImageHandler(BaseHandler):
 
 
 # noinspection PyAbstractClass
-class JamHandler(BaseHandler):
+class JamHandler(CacheableHandler):
     async def do_get(self, **kwargs):
         jam = None
         try:
@@ -268,6 +310,7 @@ class JamHandler(BaseHandler):
             logger.warning("Jam error.", exc_info=ex)
 
         if jam is not None:
+            self.cache_tags.append(f'jam-{kwargs["jam_key"]}')
             if 'voting_enabled' not in jam:
                 jam['voting_enabled'] = False
             left = list(jam['hacks'].keys())
@@ -280,6 +323,7 @@ class JamHandler(BaseHandler):
                             left.remove(hack)
             hackdata = {}
             for hack in jam['hacks'].keys():
+                self.cache_tags.append(f'hack-{hack}')
                 hackdata[hack] = get_rom_hack(self.db, hack)
                 hackdata[hack]['author'] = get_authors(self.discord_client, hackdata[hack]['role_name'], True)
                 hackdata[hack]['description'] = str(hackdata[hack]['description'], 'utf-8').splitlines()
@@ -385,6 +429,7 @@ class EditFormHandler(AuthenticatedHandler):
             hack['message_id'] = await regenerate_message(self.discord_client, DISCORD_CHANNEL_HACKS,
                                                           int(hack['message_id']) if hack['message_id'] else None, hack)
         update_hack(self.db, hack)
+        invalidate_cache(['hack', f'hack-{hack_id}'])
         regenerate_htaccess()
         return self.redirect(f'/edit/{hack_id}?saved=1')
 

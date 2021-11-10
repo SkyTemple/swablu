@@ -20,8 +20,6 @@ services:
       COOKIE_SECRET: "..."
       PORT: 30321
       ENABLE_DISCORD_WRITES: "1"
-    ports:
-      - 30321:30321
     depends_on:
       - db
     volumes:
@@ -35,3 +33,9 @@ services:
       MYSQL_DATABASE: swablu
     volumes:
       - "./db_data:/var/lib/mysql"
+  varnish:
+    image: ghcr.io/plopix/docker-varnish6/varnish6:latest
+    volumes:
+      - "./varnish.vcl/etc/varnish/default.vcl:ro"
+    ports:
+      - 30321:80

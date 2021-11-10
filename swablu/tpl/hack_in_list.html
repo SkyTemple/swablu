@@ -16,7 +16,7 @@
                     <div class="featured feat-{{fjam['award']}}"><span>Featured in <a href="/jam/{{fjam['key']}}">"{{fjam['name']}}" Hack Jam</a>.</span></div>
                 {% end %}
             {% end %}
-            {% if jam and jam['voting_enabled'] %}
+            {% if jam and jam['voting_enabled'] and key is not None %}
             <div class="vote-now">
                 <a href="/jam/{{jam_key}}/vote/{{ key }}"><div class="btn" style="background-color: #ffdfdf; border-color: #f00;"><img src="/static/images/logo/vote.png"> VOTE NOW</div></a>
             </div>
@@ -45,11 +45,20 @@
                                 allowfullscreen></iframe>
                     </div></div>
                 {% end %}
-                {% if hack['screenshot1'] is not None and hack['screenshot1'] != 'None' %}
-                    <div><div class="screenshot"><a href="/h/{{ key }}"><img loading="lazy" src="/himg/{{ key }}/1.png"></a></div></div>
-                {% end %}
-                {% if hack['screenshot2'] is not None and hack['screenshot2'] != 'None' %}
-                    <div><div class="screenshot"><a href="/h/{{ key }}"><img loading="lazy" src="/himg/{{ key }}/2.png"></a></div></div>
+                {% if key is not None %}
+                    {% if hack['screenshot1'] is not None and hack['screenshot1'] != 'None' %}
+                        <div><div class="screenshot"><a href="/h/{{ key }}"><img loading="lazy" src="/himg/{{ key }}/1.png"></a></div></div>
+                    {% end %}
+                    {% if hack['screenshot2'] is not None and hack['screenshot2'] != 'None' %}
+                        <div><div class="screenshot"><a href="/h/{{ key }}"><img loading="lazy" src="/himg/{{ key }}/2.png"></a></div></div>
+                    {% end %}
+                {% else %}
+                    {% if hack['screenshot1'] is not None and hack['screenshot1'] != 'None' %}
+                        <div><div class="screenshot"><img src="{{ hack['screenshot1'] }}"></div></div>
+                    {% end %}
+                    {% if hack['screenshot2'] is not None and hack['screenshot2'] != 'None' %}
+                        <div><div class="screenshot"><img src="{{ hack['screenshot2'] }}"></div></div>
+                    {% end %}
                 {% end %}
             </div>
         </div>

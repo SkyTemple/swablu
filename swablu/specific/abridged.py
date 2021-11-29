@@ -24,7 +24,7 @@ async def abridged():
     smode = randrange(MIN_WAIT_TIME, MAX_WAIT_TIME + 1)
     logger.info(f"Changed distortion world slow mode to {smode}.")
     await channel.edit(slowmode_delay=smode)
-    if True or randrange(0, 10) == 0:
+    if randrange(0, 10) == 0:
         appear_time = randrange(MIN_APPEAR_TIME, MAX_APPEAR_TIME)
         logger.info(f'FLATOT EVENT! Ends in {appear_time} min.')
         channel: TextChannel = guild.get_channel(FLATOT)
@@ -36,7 +36,7 @@ async def abridged():
 
 
 async def schedule_abridged():
-    if False and not discord_writes_enabled():
+    if not discord_writes_enabled():
         return
     first = True
     while True:

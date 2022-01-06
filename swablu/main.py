@@ -3,7 +3,6 @@ import logging
 
 from swablu.specific import reputation, hacks_mgmnt, general_memes
 from swablu.specific.abridged import schedule_abridged
-from swablu.specific.decimeter import schedule_decimeter
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -75,6 +74,5 @@ app = Application(routes, template_path=get_template_dir(), static_path=get_stat
 app.listen(int(PORT))
 aloop = asyncio.get_event_loop()
 asyncio.ensure_future(discord_client.start(DISCORD_BOT_USER_TOKEN), loop=aloop)
-asyncio.ensure_future(schedule_decimeter(), loop=aloop)
 asyncio.ensure_future(schedule_abridged(), loop=aloop)
 aloop.run_forever()

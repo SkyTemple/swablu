@@ -2,10 +2,11 @@ import logging
 from asyncio import sleep
 from random import randrange
 
-from discord import Guild, TextChannel, Role
+from discord import Guild, TextChannel, Role, Embed, Colour
 
 from swablu.config import discord_writes_enabled, discord_client
-from swablu.specific.decimeter import MIN_APPEAR_TIME, MAX_APPEAR_TIME
+MIN_APPEAR_TIME = 1  # min
+MAX_APPEAR_TIME = 1440  # min
 logger = logging.getLogger(__name__)
 
 GUILD_ID = 805613370098974731
@@ -37,6 +38,11 @@ async def abridged():
 
 async def schedule_abridged():
     if not discord_writes_enabled():
+        await sleep(5)
+        guild: Guild = discord_client.get_guild(GUILD_ID)
+        channel: TextChannel = guild.get_channel(FLATOT)
+        everyone: Role = guild.default_role
+        await channel.set_permissions(everyone, read_messages=False)
         return
     first = True
     while True:

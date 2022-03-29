@@ -22,7 +22,7 @@ MAX_WAIT_TIME = 21600
 async def abridged():
     guild: Guild = discord_client.get_guild(GUILD_ID)
     channel: TextChannel = guild.get_channel(DISTORTION_WORLD)
-    smode = randrange(MIN_WAIT_TIME, MAX_WAIT_TIME + 1)
+    smode = max((randrange(MIN_WAIT_TIME, MAX_WAIT_TIME + 1) for _ in range(0, 2)))
     logger.info(f"Changed distortion world slow mode to {smode}.")
     await channel.edit(slowmode_delay=smode)
     if randrange(0, 10) == 0:

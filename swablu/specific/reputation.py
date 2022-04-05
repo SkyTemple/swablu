@@ -14,6 +14,7 @@ ALLOWED_ROLES = [
     712704493661192275,  # Admin
     712704743419543564,  # Mod
     764601232794058752,  # Sprite Approver
+    960992828119457852,  # Guild Points
     # DX server:
     886168051060445204   # Mod
 ]

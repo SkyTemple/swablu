@@ -13,7 +13,6 @@ from swablu.util import MiniCtx
 ALLOWED_ROLES = [
     712704493661192275,  # Admin
     712704743419543564,  # Mod
-    776491019020926976,  # PMDCollab
     764601232794058752,  # Sprite Approver
     # DX server:
     886168051060445204   # Mod

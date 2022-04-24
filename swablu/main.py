@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from swablu.specific import reputation, hacks_mgmnt, general_memes
+from swablu.specific import reputation, hacks_mgmnt, general_memes, eos_dungeons
 from swablu.specific.abridged import schedule_abridged
 
 logging.basicConfig(
@@ -36,6 +36,7 @@ async def on_ready():
     logger.info(f'{discord_client.user} has connected to Discord!')
     if not loop_started:
         loop_started = True
+        await eos_dungeons.start()
         await loop()
 
 
@@ -50,6 +51,8 @@ async def on_member_update(before: Member, after: Member):
 
 @discord_client.event
 async def on_message(message: Message):
+    if await eos_dungeons.process_message(message):
+        return
     if not discord_writes_enabled():
         return
     if message.guild.id in DISCORD_GUILD_IDS:

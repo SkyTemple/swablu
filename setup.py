@@ -22,7 +22,10 @@ setup(
         'discord.py>=1.5.1',
         'requests-oauthlib>=1.3.0',
         'tornado>=6.1',
-        'mysql-connector-python>=8.0.20'
+        'mysql-connector-python>=8.0.20',
+        'skytemple-dtef>=1.1.5',
+        'skytemple-files>=1.3.0',
+        'pycairo'
     ],
     classifiers=[
         'Development Status :: 4 - Beta',

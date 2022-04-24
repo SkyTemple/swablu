@@ -20,10 +20,12 @@ services:
       COOKIE_SECRET: "..."
       PORT: 30321
       ENABLE_DISCORD_WRITES: "1"
+      EOS_DUNGEONS_TILESET_PATH: "/app/dungeon_tiles"
     depends_on:
       - db
     volumes:
       - "/xyz/xyz/.htaccess:/app/.htaccess"
+      - "./dungeon_tiles:/app/dungeon_tiles"
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password

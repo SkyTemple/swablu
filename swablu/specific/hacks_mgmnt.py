@@ -1,9 +1,13 @@
+import json
 import logging
-from discord import Message, TextChannel, Role
+from io import StringIO
+
+from discord import Message, TextChannel, Role, File
 from discord.ext.commands import RoleConverter
 from swablu.util import MiniCtx
 
-from swablu.config import database, TABLE_NAME, discord_client
+from swablu.config import database, TABLE_NAME, discord_client, get_jam, update_jam, create_jam
+from swablu.web import invalidate_cache
 
 ALLOWED_ROLES = [
     712704493661192275,  # Admin
@@ -36,6 +40,69 @@ async def process_add_hack(message: Message, channel: TextChannel):
     )
 
 
+async def process_dump_jam(message: Message, channel: TextChannel):
+    cmd_parts = message.content.split(' ')
+    if len(cmd_parts) < 2:
+        raise ValueError("Missing parameters. Usage: !dump_jam <key>")
+    jam_key = cmd_parts[1]
+
+    jam = get_jam(database, jam_key)
+
+    data = StringIO()
+    json.dump(jam, data, indent=2)
+
+    await channel.send("", files=[
+        File(data, f"{jam_key}.json")
+    ])
+
+
+async def process_create_jam(message: Message, channel: TextChannel):
+    cmd_parts = message.content.split(' ')
+    if len(cmd_parts) < 2:
+        raise ValueError("Missing parameters. Usage: !create_jam <key>")
+    if len(message.attachments) != 1:
+        raise ValueError("Missing file to update to.")
+    jam_key = cmd_parts[1]
+    jam_data = await message.attachments[0].read()
+
+    jam = None
+    try:
+        jam = get_jam(database, jam_key)
+    except Exception:
+        # ok we expect an error if there's nothing.
+        pass
+
+    if jam is not None:
+        raise ValueError("This jam already exists. Use !update_jam.")
+
+    create_jam(database, jam_key, jam_data)
+    invalidate_cache(f'jam-{jam_key}')
+    await channel.send("OK")
+
+
+async def process_update_jam(message: Message, channel: TextChannel):
+    cmd_parts = message.content.split(' ')
+    if len(cmd_parts) < 2:
+        raise ValueError("Missing parameters. Usage: !update_jam <key>")
+    if len(message.attachments) != 1:
+        raise ValueError("Missing file to update to.")
+    jam_key = cmd_parts[1]
+    jam_data = await message.attachments[0].read()
+
+    jam = None
+    try:
+        jam = get_jam(database, jam_key)
+    except Exception:
+        pass
+
+    if jam is None:
+        raise ValueError("This jam does not exist. Use !create_jam.")
+
+    update_jam(database, jam_key, jam_data)
+    invalidate_cache(f'jam-{jam_key}')
+    await channel.send("OK")
+
+
 async def process_cmd(message: Message):
     if isinstance(message.channel, TextChannel):
         cmd_parts = message.content.split(' ')
@@ -44,6 +111,18 @@ async def process_cmd(message: Message):
                 if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")
                 await process_add_hack(message, message.channel)
+            if cmd_parts[0] == prefix + 'dump_jam':
+                if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
+                    raise RuntimeError("You are not allowed to use this command.")
+                await process_dump_jam(message, message.channel)
+            if cmd_parts[0] == prefix + 'create_jam':
+                if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
+                    raise RuntimeError("You are not allowed to use this command.")
+                await process_create_jam(message, message.channel)
+            if cmd_parts[0] == prefix + 'update_jam':
+                if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
+                    raise RuntimeError("You are not allowed to use this command.")
+                await process_update_jam(message, message.channel)
         except Exception as ex:
             logger.error("Error running rep command", exc_info=ex)
             await message.channel.send(f"Error running this command: {str(ex)}")

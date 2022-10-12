@@ -144,6 +144,26 @@ def get_jam(dbcon, key):
     return json.loads(d['config'])
 
 
+def create_jam(dbcon, jam_key, config):
+    cursor = dbcon.cursor()
+    sql = f"INSERT INTO {TABLE_NAME_JAM} (id, key, config) VALUES(%s, %s, %s)"
+    cursor.execute(sql, (
+        jam_key, config,
+    ))
+    dbcon.commit()
+    cursor.close()
+
+
+def update_jam(dbcon, jam_key, config):
+    cursor = dbcon.cursor()
+    sql = f"UPDATE {TABLE_NAME_JAM} SET `config` = %s WHERE `key` = %s"
+    cursor.execute(sql, (
+        config, jam_key,
+    ))
+    dbcon.commit()
+    cursor.close()
+
+
 def vote_jam(dbcon, jam_key, user_id, hack):
     cursor = dbcon.cursor()
     sql = f"INSERT INTO {TABLE_NAME_JAM_VOTES} (user_id, jam, hack) VALUES(%s, %s, %s) ON DUPLICATE KEY UPDATE hack=%s"

@@ -50,6 +50,7 @@ async def process_dump_jam(message: Message, channel: TextChannel):
 
     data = StringIO()
     json.dump(jam, data, indent=2)
+    data.seek(0)
 
     await channel.send("", files=[
         File(data, f"{jam_key}.json")

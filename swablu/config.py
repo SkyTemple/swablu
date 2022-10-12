@@ -146,7 +146,7 @@ def get_jam(dbcon, key):
 
 def create_jam(dbcon, jam_key, config):
     cursor = dbcon.cursor()
-    sql = f"INSERT INTO {TABLE_NAME_JAM} (key, config) VALUES(%s, %s)"
+    sql = f"INSERT INTO {TABLE_NAME_JAM} (`key`, `config`) VALUES(%s, %s)"
     cursor.execute(sql, (
         jam_key, config,
     ))

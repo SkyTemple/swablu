@@ -6,7 +6,8 @@ from time import sleep
 import discord
 import pkg_resources
 import mysql.connector
-from mysql.connector import MySQLConnection
+from mysql.connector import MySQLConnection, OperationalError
+from mysql.connector.cursor import MySQLCursor
 
 intents = discord.Intents.default()
 intents.members = True
@@ -55,8 +56,16 @@ if 'BASE_URL' not in os.environ:
 BASE_URL = os.environ['BASE_URL']
 
 
+def db_cursor(dbcon: MySQLConnection, **kwargs) -> MySQLCursor:
+    try:
+        return dbcon.cursor(**kwargs)
+    except OperationalError:
+        dbcon.reconnect()
+        return dbcon.cursor(**kwargs)
+
+
 def check_table_exists(dbcon, tablename):
-    dbcur = dbcon.cursor()
+    dbcur = db_cursor(dbcon)
     dbcur.execute("""
         SELECT COUNT(*)
         FROM information_schema.tables
@@ -68,7 +77,7 @@ def check_table_exists(dbcon, tablename):
 
 
 def get_rom_hacks(dbcon, filter=None, sorted=False):
-    cursor = dbcon.cursor(dictionary=True, buffered=True)
+    cursor = db_cursor(dbcon, dictionary=True, buffered=True)
     if filter is None:
         sql = f"SELECT * FROM `{TABLE_NAME}`"
         if sorted:
@@ -92,7 +101,7 @@ def get_rom_hacks(dbcon, filter=None, sorted=False):
 
 
 def get_rom_hack(dbcon, key):
-    cursor = dbcon.cursor(dictionary=True, buffered=True)
+    cursor = db_cursor(dbcon, dictionary=True, buffered=True)
     sql = f"SELECT * FROM `{TABLE_NAME}` WHERE `key` = %s"
     cursor.execute(sql, (key,))
     d = cursor.fetchone()
@@ -108,7 +117,7 @@ def get_rom_hack_img(dbcon, key, id):
     elif int(id) == 2:
         field = 'screenshot2'
     if field:
-        cursor = dbcon.cursor(dictionary=True, buffered=True)
+        cursor = db_cursor(dbcon, dictionary=True, buffered=True)
         sql = f"SELECT `{field}` FROM `{TABLE_NAME}` WHERE `key` = %s"
         cursor.execute(sql, (key,))
         d = cursor.fetchone()
@@ -121,7 +130,7 @@ def get_rom_hack_img(dbcon, key, id):
 
 
 def get_jams(dbcon):
-    cursor = dbcon.cursor(dictionary=True, buffered=True)
+    cursor = db_cursor(dbcon, dictionary=True, buffered=True)
     sql = f"SELECT * FROM `{TABLE_NAME_JAM}`"
     cursor.execute(sql)
     rows = []
@@ -135,7 +144,7 @@ def get_jams(dbcon):
 
 
 def get_jam(dbcon, key):
-    cursor = dbcon.cursor(dictionary=True, buffered=True)
+    cursor = db_cursor(dbcon, dictionary=True, buffered=True)
     sql = f"SELECT * FROM `{TABLE_NAME_JAM}` WHERE `key` = %s"
     cursor.execute(sql, (key,))
     d = cursor.fetchone()
@@ -145,7 +154,7 @@ def get_jam(dbcon, key):
 
 
 def create_jam(dbcon, jam_key, config):
-    cursor = dbcon.cursor()
+    cursor = db_cursor(dbcon)
     sql = f"INSERT INTO {TABLE_NAME_JAM} (`key`, `config`) VALUES(%s, %s)"
     cursor.execute(sql, (
         jam_key, config,
@@ -155,7 +164,7 @@ def create_jam(dbcon, jam_key, config):
 
 
 def update_jam(dbcon, jam_key, config):
-    cursor = dbcon.cursor()
+    cursor = db_cursor(dbcon)
     sql = f"UPDATE {TABLE_NAME_JAM} SET `config` = %s WHERE `key` = %s"
     cursor.execute(sql, (
         config, jam_key,
@@ -165,7 +174,7 @@ def update_jam(dbcon, jam_key, config):
 
 
 def vote_jam(dbcon, jam_key, user_id, hack):
-    cursor = dbcon.cursor()
+    cursor = db_cursor(dbcon)
     sql = f"INSERT INTO {TABLE_NAME_JAM_VOTES} (user_id, jam, hack) VALUES(%s, %s, %s) ON DUPLICATE KEY UPDATE hack=%s"
     cursor.execute(sql, (
         user_id, jam_key, hack, hack
@@ -175,7 +184,7 @@ def vote_jam(dbcon, jam_key, user_id, hack):
 
 
 def update_hack(dbcon, hack):
-    cursor = dbcon.cursor()
+    cursor = db_cursor(dbcon)
     sql = f"UPDATE `{TABLE_NAME}` SET " \
           f"`name` = %s," \
           f"`description` = %s," \
@@ -225,7 +234,7 @@ while database is None:
         sleep(5)
 
 if not check_table_exists(database, TABLE_NAME):
-    dbcur = database.cursor()
+    dbcur = db_cursor(database)
     logger.info("Creating hacks table...")
     # Could surely be optimized, but fine for now.
     dbcur.execute(f"""
@@ -253,7 +262,7 @@ else:
     logger.info("Hacks table existed!")
 
 if not check_table_exists(database, TABLE_NAME_REPUTATION):
-    dbcur = database.cursor()
+    dbcur = db_cursor(database)
     logger.info("Creating reputation table...")
     # Could surely be optimized, but fine for now.
     dbcur.execute(f"""
@@ -268,7 +277,7 @@ else:
     logger.info("Reputation table existed!")
 
 if not check_table_exists(database, TABLE_NAME_JAM):
-    dbcur = database.cursor()
+    dbcur = db_cursor(database)
     logger.info("Creating jam table...")
     dbcur.execute(f"""
     CREATE TABLE `{TABLE_NAME_JAM}` (
@@ -283,7 +292,7 @@ else:
     logger.info("Jam table existed!")
 
 if not check_table_exists(database, TABLE_NAME_JAM_VOTES):
-    dbcur = database.cursor()
+    dbcur = db_cursor(database)
     logger.info("Creating jam votes table...")
     dbcur.execute(f"""
     CREATE TABLE `{TABLE_NAME_JAM_VOTES}` (

@@ -6,7 +6,7 @@ from discord import Message, TextChannel, Role, File
 from discord.ext.commands import RoleConverter
 from swablu.util import MiniCtx
 
-from swablu.config import database, TABLE_NAME, discord_client, get_jam, update_jam, create_jam
+from swablu.config import database, TABLE_NAME, discord_client, get_jam, update_jam, create_jam, db_cursor
 from swablu.web import invalidate_cache
 
 ALLOWED_ROLES = [
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_hack(name: str, role: Role):
-    cursor = database.cursor()
+    cursor = db_cursor(database)
     sql = f"INSERT INTO {TABLE_NAME} (`key`, `role_name`) VALUES(%s, %s)"
     cursor.execute(sql, (
         name, role.name

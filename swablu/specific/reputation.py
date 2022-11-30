@@ -7,7 +7,7 @@ import tornado.web
 from discord import Message, TextChannel, User
 from discord.ext.commands import TextChannelConverter, UserConverter
 
-from swablu.config import discord_client, DISCORD_GUILD_IDS, database, TABLE_NAME_REPUTATION
+from swablu.config import discord_client, DISCORD_GUILD_IDS, database, TABLE_NAME_REPUTATION, db_cursor
 from swablu.util import MiniCtx
 
 ALLOWED_ROLES = [
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_guild_points_for(user: User) -> int:
-    cursor = database.cursor(dictionary=True)
+    cursor = db_cursor(database, dictionary=True)
     sql = f"SELECT * FROM `{TABLE_NAME_REPUTATION}` WHERE discord_id = %s"
     cursor.execute(sql, (user.id,))
     r = cursor.fetchone()
@@ -51,7 +51,7 @@ def get_guild_points_for(user: User) -> int:
 
 
 def give_guild_points_to(user: User, amount: int):
-    cursor = database.cursor()
+    cursor = db_cursor(database)
     sql = f"INSERT INTO {TABLE_NAME_REPUTATION} (discord_id, points) VALUES(%s, %s) ON DUPLICATE KEY UPDATE points=%s"
     pnts = get_guild_points_for(user) + amount
     cursor.execute(sql, (
@@ -71,7 +71,7 @@ def _get_username(id: int):
 
 
 def get_all_guild_points() -> List[Tuple[int, str, int]]:
-    cursor = database.cursor(dictionary=True)
+    cursor = db_cursor(database, dictionary=True)
     sql = f"SELECT * FROM `{TABLE_NAME_REPUTATION}` ORDER BY `points` DESC"
     cursor.execute(sql)
     d = []

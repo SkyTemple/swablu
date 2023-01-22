@@ -6,7 +6,7 @@ from discord import Message, TextChannel, Role, File
 from discord.ext.commands import RoleConverter
 from swablu.util import MiniCtx
 
-from swablu.config import database, TABLE_NAME, discord_client, get_jam, update_jam, create_jam, db_cursor
+from swablu.config import database, TABLE_NAME, discord_client, get_jam, jam_exists, update_jam, create_jam, db_cursor
 from swablu.web import invalidate_cache
 
 ALLOWED_ROLES = [
@@ -66,14 +66,7 @@ async def process_create_jam(message: Message, channel: TextChannel):
     jam_key = cmd_parts[1]
     jam_data = await message.attachments[0].read()
 
-    jam = None
-    try:
-        jam = get_jam(database, jam_key)
-    except Exception:
-        # ok we expect an error if there's nothing.
-        pass
-
-    if jam is not None:
+    if jam_exists(database, jam_key):
         raise ValueError("This jam already exists. Use !update_jam.")
 
     create_jam(database, jam_key, jam_data)
@@ -90,13 +83,7 @@ async def process_update_jam(message: Message, channel: TextChannel):
     jam_key = cmd_parts[1]
     jam_data = await message.attachments[0].read()
 
-    jam = None
-    try:
-        jam = get_jam(database, jam_key)
-    except Exception:
-        pass
-
-    if jam is None:
+    if not jam_exists(database, jam_key):
         raise ValueError("This jam does not exist. Use !create_jam.")
 
     update_jam(database, jam_key, jam_data)

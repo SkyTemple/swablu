@@ -14,6 +14,10 @@ ALLOWED_ROLES = [
     712704743419543564,  # Mod
 ]
 
+ALLOWED_ROLES_DELETE = [
+    712704493661192275,  # Admin
+]
+
 prefix = '!'
 logger = logging.getLogger(__name__)
 
@@ -28,6 +32,16 @@ def create_hack(name: str, role: Role):
     cursor.close()
 
 
+def delete_hack(name: str):
+    cursor = db_cursor(database)
+    sql = f"DELETE FROM {TABLE_NAME} WHERE `key` = %s"
+    cursor.execute(sql, (
+        name,
+    ))
+    database.commit()
+    cursor.close()
+
+
 async def process_add_hack(message: Message, channel: TextChannel):
     cmd_parts = message.content.split(' ')
     ctx = MiniCtx(message.guild, discord_client, message)
@@ -37,6 +51,16 @@ async def process_add_hack(message: Message, channel: TextChannel):
     create_hack(cmd_parts[1], role)
     await channel.send(
         f"New Hack `{cmd_parts[1]}` created for role {role.name}"
+    )
+
+
+async def process_delete_hack(message: Message, channel: TextChannel):
+    cmd_parts = message.content.split(' ')
+    if len(cmd_parts) < 2:
+        raise ValueError("Missing parameters. Usage: !delete_hack <key>")
+    delete_hack(cmd_parts[1])
+    await channel.send(
+        f"Hack `{cmd_parts[1]}` deleted"
     )
 
 
@@ -99,6 +123,10 @@ async def process_cmd(message: Message):
                 if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")
                 await process_add_hack(message, message.channel)
+            if cmd_parts[0] == prefix + 'delete_hack':
+                if not any(r.id in ALLOWED_ROLES_DELETE for r in message.author.roles):
+                    raise RuntimeError("You are not allowed to use this command.")
+                await process_delete_hack(message, message.channel)
             if cmd_parts[0] == prefix + 'dump_jam':
                 if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")

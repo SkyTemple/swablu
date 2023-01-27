@@ -153,6 +153,13 @@ def get_jam(dbcon, key):
     return json.loads(d['config'])
 
 
+def jam_exists(dbcon, key):
+    cursor = db_cursor(dbcon, dictionary=True, buffered=True)
+    sql = f"SELECT * FROM `{TABLE_NAME_JAM}` WHERE `key` = %s"
+    cursor.execute(sql, (key,))
+    return cursor.fetchone() is not None
+
+
 def create_jam(dbcon, jam_key, config):
     cursor = db_cursor(dbcon)
     sql = f"INSERT INTO {TABLE_NAME_JAM} (`key`, `config`) VALUES(%s, %s)"

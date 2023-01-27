@@ -13,7 +13,7 @@
         <div class="inner-content">
             {% if 'featured_jams' in hack %}
                 {% for fjam in hack['featured_jams'] %}
-                    <div class="featured feat-{{fjam['award']}}"><span>Featured in <a href="/jam/{{fjam['key']}}">"{{fjam['name']}}" Hack Jam</a>.</span></div>
+                    <div class="featured feat-{{fjam['award']}}"><span>Featured in <a href="/jam/{{fjam['key']}}">"{{fjam['name']}}" Hack Event</a>.</span></div>
                 {% end %}
             {% end %}
             {% if jam and jam['voting_enabled'] and key is not None %}

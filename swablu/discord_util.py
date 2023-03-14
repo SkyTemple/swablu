@@ -8,7 +8,7 @@ from swablu.roles import get_hack_type_str
 
 async def regenerate_message(discord_client: Client, channel_id: int, message_id: Optional['int'], hack: dict):
     authors = get_authors(discord_client, hack['role_name'], False)
-    text = f'**{hack["name"]}** by {authors} ({get_hack_type_str(hack["hack_type"])}):\n<https://skytemple.org/{hack["key"]}>'
+    text = f'**{hack["name"]}** by {authors} ({get_hack_type_str(hack["hack_type"])}):\n<https://hacks.skytemple.org/h/{hack["key"]}>'
     channel: TextChannel = discord_client.get_channel(channel_id)
     if not message_id:
         message = await channel.send(text)

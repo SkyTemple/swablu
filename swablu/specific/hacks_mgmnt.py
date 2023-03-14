@@ -6,7 +6,9 @@ from discord import Message, TextChannel, Role, File
 from discord.ext.commands import RoleConverter
 from swablu.util import MiniCtx
 
-from swablu.config import database, TABLE_NAME, discord_client, get_jam, jam_exists, update_jam, create_jam, db_cursor
+from swablu.config import database, TABLE_NAME, discord_client, discord_writes_enabled, get_jam, get_rom_hacks, \
+    jam_exists, update_jam, create_jam, db_cursor, DISCORD_CHANNEL_HACKS
+from swablu.discord_util import regenerate_message
 from swablu.web import invalidate_cache
 
 ALLOWED_ROLES = [
@@ -115,6 +117,17 @@ async def process_update_jam(message: Message, channel: TextChannel):
     await channel.send("OK")
 
 
+async def process_update_hack_list(channel: TextChannel):
+    if not discord_writes_enabled():
+        raise ValueError("Cannot update hack list: Discord writes are disabled in the config.")
+
+    hacks = get_rom_hacks(databse)
+    for hack in hacks:
+        if hack['message_id']:
+            await regenerate_message(discord_client, DISCORD_CHANNEL_HACKS, int(hack['message_id']), hack)
+    await channel.send("Hack list successfully updated")
+
+
 async def process_cmd(message: Message):
     if isinstance(message.channel, TextChannel):
         cmd_parts = message.content.split(' ')
@@ -139,6 +152,10 @@ async def process_cmd(message: Message):
                 if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")
                 await process_update_jam(message, message.channel)
+            if cmd_parts[0] == prefix + 'update_hack_list':
+                if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
+                    raise RuntimeError("You are not allowed to use this command.")
+                await process_update_hack_list(message.channel)
         except Exception as ex:
-            logger.error("Error running rep command", exc_info=ex)
+            logger.error("Error running hack management command", exc_info=ex)
             await message.channel.send(f"Error running this command: {str(ex)}")

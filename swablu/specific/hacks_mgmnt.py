@@ -121,7 +121,7 @@ async def process_update_hack_list(channel: TextChannel):
     if not discord_writes_enabled():
         raise ValueError("Cannot update hack list: Discord writes are disabled in the config.")
 
-    hacks = get_rom_hacks(databse)
+    hacks = get_rom_hacks(database)
     for hack in hacks:
         if hack['message_id']:
             await regenerate_message(discord_client, DISCORD_CHANNEL_HACKS, int(hack['message_id']), hack)

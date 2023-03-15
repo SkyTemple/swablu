@@ -15,7 +15,8 @@ async def regenerate_message(discord_client: Client, channel_id: int, message_id
         message_id = message.id
     else:
         message = await channel.fetch_message(message_id)
-        await message.edit(content=text)
+        if message.content != text:
+            await message.edit(content=text)
 
     return message_id
 

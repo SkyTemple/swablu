@@ -23,9 +23,9 @@ async def regenerate_message(discord_client: Client, channel_id: int, message_id
             break
         except Exception:
             try_count += 1
-            time.sleep(try_count * 5)
             if try_count >= 10:
                 raise
+            time.sleep(try_count * 5)
 
     return message_id
 

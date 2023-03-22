@@ -1,6 +1,5 @@
 import json
 import logging
-import time
 from io import StringIO
 
 from discord import Message, TextChannel, Role, File
@@ -126,8 +125,6 @@ async def process_update_hack_list(channel: TextChannel):
     for hack in hacks:
         if hack['message_id']:
             await regenerate_message(discord_client, DISCORD_CHANNEL_HACKS, int(hack['message_id']), hack)
-            # TODO: Proper delay (check rate limit headers: https://discord.com/developers/docs/topics/rate-limits)
-            time.sleep(0.75)
 
     await channel.send("Hack list successfully updated")
 

@@ -207,10 +207,10 @@ class GuildPointsHandler(tornado.web.RequestHandler):
         try:
             if self.get_query_argument("json", None) is not None:
                 self.set_header('Content-Type', 'application/json')
-                all_credits = {}
+                all_points = {}
                 for _, discord_id, __, points in get_all_guild_points():
-                    all_credits[discord_id] = points
-                self.write(json.dumps(all_credits))
+                    all_points[discord_id] = points
+                self.write(json.dumps(all_points))
                 await self.flush()
             else:
                 await self.render("points.html", title="SkyTemple - Guild Points",

@@ -1,7 +1,7 @@
 import json
 import logging
 import traceback
-from typing import List, Tuple
+from typing import List, Tuple, NamedTuple
 
 import tornado.web
 from discord import Message, TextChannel, User
@@ -65,18 +65,28 @@ def give_guild_points_to(user: User, amount: int):
 def _get_username(id: int):
     try:
         u: User = discord_client.get_user(id)
+        # if the discriminator is 0, they are using the name discord name system.
+        if u.discriminator == 0:
+            return u.name
         return u.name + '#' + u.discriminator
     except:
         return f'<@{id}>'
 
 
-def get_all_guild_points() -> List[Tuple[int, str, int]]:
+class GuidPointResults(NamedTuple):
+    idx: int
+    discord_id: int
+    username: str
+    guild_points: int
+
+
+def get_all_guild_points() -> List[GuidPointResults]:
     cursor = db_cursor(database, dictionary=True)
     sql = f"SELECT * FROM `{TABLE_NAME_REPUTATION}` ORDER BY `points` DESC"
     cursor.execute(sql)
     d = []
     for i, k in enumerate(cursor.fetchall()):
-        d.append((i + 1, _get_username(k['discord_id']), k['points']))
+        d.append((i + 1, k['discord_id'], _get_username(k['discord_id']), k['points']))
     database.commit()
     cursor.close()
     return d
@@ -195,8 +205,16 @@ async def process_cmd(message: Message):
 class GuildPointsHandler(tornado.web.RequestHandler):
     async def get(self, *args, **kwargs):
         try:
-            await self.render("points.html", title="SkyTemple - Guild Points",
-                              all_points=get_all_guild_points(), **DEFAULT_AUTHOR_DESCRIPTION)
+            if self.get_query_argument("json", None) is not None:
+                self.set_header('Content-Type', 'application/json')
+                all_points = {}
+                for _, discord_id, __, points in get_all_guild_points():
+                    all_points[discord_id] = points
+                self.write(json.dumps(all_points))
+                await self.flush()
+            else:
+                await self.render("points.html", title="SkyTemple - Guild Points",
+                                  all_points=get_all_guild_points(), **DEFAULT_AUTHOR_DESCRIPTION)
         except Exception as err:
             self.set_status(500)
             logger.exception(err)

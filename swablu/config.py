@@ -190,21 +190,35 @@ def vote_jam(dbcon, jam_key, user_id, hack):
     cursor.close()
 
 
-def update_hack(dbcon, hack):
+def update_hack(dbcon, hack, silent=False):
     cursor = db_cursor(dbcon)
-    sql = f"UPDATE `{TABLE_NAME}` SET " \
-          f"`name` = %s," \
-          f"`description` = %s," \
-          f"`screenshot1` = %s," \
-          f"`screenshot2` = %s," \
-          f"`url_main` = %s," \
-          f"`url_discord` = %s," \
-          f"`url_download` = %s," \
-          f"`video` = %s," \
-          f"`hack_type` = %s," \
-          f"`message_id` = %s," \
-          f"`date_updated` = NOW()" \
-          f" WHERE id = %s"
+    if silent:
+        sql = f"UPDATE `{TABLE_NAME}` SET " \
+              f"`name` = %s," \
+              f"`description` = %s," \
+              f"`screenshot1` = %s," \
+              f"`screenshot2` = %s," \
+              f"`url_main` = %s," \
+              f"`url_discord` = %s," \
+              f"`url_download` = %s," \
+              f"`video` = %s," \
+              f"`hack_type` = %s," \
+              f"`message_id` = %s" \
+              f" WHERE id = %s"
+    else:
+        sql = f"UPDATE `{TABLE_NAME}` SET " \
+              f"`name` = %s," \
+              f"`description` = %s," \
+              f"`screenshot1` = %s," \
+              f"`screenshot2` = %s," \
+              f"`url_main` = %s," \
+              f"`url_discord` = %s," \
+              f"`url_download` = %s," \
+              f"`video` = %s," \
+              f"`hack_type` = %s," \
+              f"`message_id` = %s," \
+              f"`date_updated` = NOW()" \
+              f" WHERE id = %s"
     cursor.execute(sql, (
         hack['name'],
         hack['description'],

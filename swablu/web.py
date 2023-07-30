@@ -404,6 +404,9 @@ class EditFormHandler(AuthenticatedHandler):
                 break
         if key != hack_id or not hack:
             return self.redirect('/edit')
+
+        editing = bool(hack['message_id'])
+
         try:
             hack['name'] = self.get_body_argument('name')
             hack['description'] = self.get_body_argument('description')
@@ -434,7 +437,9 @@ class EditFormHandler(AuthenticatedHandler):
         if discord_writes_enabled():
             hack['message_id'] = await regenerate_message(self.discord_client, DISCORD_CHANNEL_HACKS,
                                                           int(hack['message_id']) if hack['message_id'] else None, hack)
-        update_hack(self.db, hack)
+
+        silent_edit = editing and self.get_body_argument('silent', '') != ''
+        update_hack(self.db, hack, silent_edit)
         invalidate_cache(['hack', f'hack-{hack_id}'])
         regenerate_htaccess()
         return self.redirect(f'/edit/{hack_id}?saved=1')

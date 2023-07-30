@@ -306,6 +306,11 @@ input, textarea, select, button {
     max-width: 90%;
 }
 
+input[type=checkbox] {
+  display: inline;
+  width: unset;
+}
+
 textarea {
     height: 150px;
 }

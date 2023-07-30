@@ -2,15 +2,15 @@
 <h1>Edit ROM Hack</h1>
 {% if hack['message_id'] %}
 <div><span><em>Your hack micro page is reachable at <a href="https://skytemple.org/h/{{ hack['key'] }}">https://skytemple.org/h/{{ hack['key'] }}</a></em></span></div>
-{% else %}
+{% end %}
+{% if missing_arg %}
 <div class="red">
-    <span>You may only submit your hack if at least one of the following is true:</span>
-    <ul>
-        <li>Your ROM Hack is finished or has a playable demo.</li>
-        <li>Your ROM Hack is a machinima and has at least one episode released.</li>
-        <li>Your ROM Hack has a Discord server.</li>
-        <li>Your ROM Hack was featured in one of Parakooopa's ROM Hack Showcases.</li>
-    </ul>
+    <span>One or more required fields are missing.</span>
+</div>
+{% end %}
+{% if invalid_download_link %}
+<div class="red">
+    <span>The download link provided is invalid. Please link to the Discord attachment, not to the message.</span>
 </div>
 {% end %}
 {% if saved %}
@@ -49,8 +49,8 @@
             </select>
         </label>
         <label for="url_main">
-            Main URL*: <input name="url_main" id="url_main" placeholder="Main URL" value="{{ hack['url_main'] or '' }}"/>
-            <em>This should link to a Project Pokémon page or similar for ROM Hacks and YouTube channels for Machinimas.</em>
+            Main URL: <input name="url_main" id="url_main" placeholder="Main URL" value="{{ hack['url_main'] or '' }}"/>
+            <em>This should link to a forum post, public site or similar for ROM Hacks and YouTube channels for Machinimas.</em>
         </label>
         <label for="url_main">
             Discord URL: <input name="url_discord" id="url_discord" placeholder="Discord URL" value="{{ hack['url_discord'] or '' }}"/>
@@ -58,15 +58,15 @@
         </label>
         <label for="url_download">
             Download URL: <input name="url_download" id="url_download" placeholder="Download URL" value="{{ hack['url_download'] or '' }}"/>
-            <em>If you have a playable ROM hack, please put the download link here.</em>
+            <em>If you have a playable ROM hack, please put the download link here. You can link a Discord embed, but not a Discord message since those can't be accessed from outside the server where they were posted.</em>
         </label>
         <label for="screenshot1">
             Screenshot 1: <input name="screenshot1" id="screenshot1" type="file"/>
-            <em>Max 1MB. Should have the aspect ration of a single DS screen. If not specified the current screenshot will be kept, if there is already one.</em>
+            <em>Max 1MB. Should have the aspect ratio of a single DS screen. If not specified the current screenshot will be kept, if there is already one.</em>
         </label>
         <label for="screenshot2">
             Screenshot 2: <input name="screenshot2" id="screenshot2" type="file"/>
-            <em>Max 1MB. Should have the aspect ration of a single DS screen. If not specified the current screenshot will be kept, if there is already one.</em>
+            <em>Max 1MB. Should have the aspect ratio of a single DS screen. If not specified the current screenshot will be kept, if there is already one.</em>
         </label>
         <label for="video">
             Youtube Video: <input name="video" id="video" placeholder="YouTube URL" value="{{ hack['video'] or '' }}"/>

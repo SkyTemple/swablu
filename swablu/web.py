@@ -19,6 +19,7 @@ from requests_oauthlib import OAuth2Session
 from discord import Client, Guild, Member
 from mysql.connector import MySQLConnection
 from tornado import httputil
+from tornado.web import MissingArgumentError
 
 from swablu.config import discord_client, database, AUTHORIZATION_BASE_URL, OAUTH2_REDIRECT_URI, OAUTH2_CLIENT_ID, \
     OAUTH2_CLIENT_SECRET, TOKEN_URL, API_BASE_URL, DISCORD_GUILD_IDS, DISCORD_ADMIN_ROLES, get_rom_hacks, \
@@ -403,12 +404,17 @@ class EditFormHandler(AuthenticatedHandler):
                 break
         if key != hack_id or not hack:
             return self.redirect('/edit')
-        hack['name'] = self.get_body_argument('name', '')
-        hack['description'] = self.get_body_argument('description', '')
-        hack['hack_type'] = self.get_body_argument('hack_type', '')
+        try:
+            hack['name'] = self.get_body_argument('name')
+            hack['description'] = self.get_body_argument('description')
+            hack['hack_type'] = self.get_body_argument('hack_type')
+        except MissingArgumentError:
+            return self.redirect(f'/edit/{hack_id}?missing_arg=1')
         hack['url_main'] = self.get_body_argument('url_main', '')
         hack['url_discord'] = self.get_body_argument('url_discord', '')
         hack['url_download'] = self.get_body_argument('url_download', '')
+        if "discord.com/channels/" in hack['url_download']:
+            return self.redirect(f'/edit/{hack_id}?invalid_download_link=1')
         screenshot1 = self.request.files.get('screenshot1', None)
         screenshot2 = self.request.files.get('screenshot2', None)
         if screenshot1:
@@ -440,6 +446,8 @@ class EditFormHandler(AuthenticatedHandler):
                                   title='SkyTemple - Edit ROM Hack',
                                   hack=hack,
                                   saved=bool(self.get_argument('saved', '')),
+                                  missing_arg=bool(self.get_argument('missing_arg', '')),
+                                  invalid_download_link=bool(self.get_argument('invalid_download_link', '')),
                                   **DEFAULT_AUTHOR_DESCRIPTION)
                 return
         return self.redirect('/edit')

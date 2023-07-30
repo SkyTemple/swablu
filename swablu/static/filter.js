@@ -31,7 +31,7 @@ function refilter() {
     
     switch (selStatus.value) {
         case "wip":
-            _keep(hack_types, ['balance_hack_wip', 'story_hack_wip', 'translation_wip', 'misc_hack_wip']);
+            _keep(hack_types, ['balance_hack_wip', 'story_hack_wip', 'translation_wip', 'misc_hack_wip', 'machinima_ongoing']);
             break;
         case "mostly":
             _keep(hack_types, ['balance_hack_mostly', 'story_hack_mostly', 'translation_mostly', 'misc_hack_mostly', 'machinima_ongoing']);

@@ -22,19 +22,16 @@ function _keep(a, b) {
 function refilter() {
     // this is garbage.
     var hack_types = [
-        'balance_hack_wip', 'balance_hack_demo', 'balance_hack_mostly', 'balance_hack',
-        'story_hack_wip', 'story_hack_demo', 'story_hack_mostly', 'story_hack',
-        'translation_wip', 'translation_demo', 'translation_mostly', 'translation',
-        'misc_hack_wip', 'misc_hack_demo', 'misc_hack_mostly', 'misc_hack',
+        'balance_hack_wip', 'balance_hack_mostly', 'balance_hack',
+        'story_hack_wip', 'story_hack_mostly', 'story_hack',
+        'translation_wip', 'translation_mostly', 'translation',
+        'misc_hack_wip', 'misc_hack_mostly', 'misc_hack',
         'machinima_ongoing', 'machinima'
     ];
     
     switch (selStatus.value) {
         case "wip":
             _keep(hack_types, ['balance_hack_wip', 'story_hack_wip', 'translation_wip', 'misc_hack_wip']);
-            break;
-        case "demo":
-            _keep(hack_types, ['balance_hack_demo', 'story_hack_demo', 'translation_demo', 'misc_hack_demo', 'machinima_ongoing']);
             break;
         case "mostly":
             _keep(hack_types, ['balance_hack_mostly', 'story_hack_mostly', 'translation_mostly', 'misc_hack_mostly', 'machinima_ongoing']);
@@ -46,16 +43,16 @@ function refilter() {
     
     switch (selType.value) {
         case "balance_hack":
-            _keep(hack_types, ['balance_hack_wip', 'balance_hack_demo', 'balance_hack_mostly', 'balance_hack']);
+            _keep(hack_types, ['balance_hack_wip', 'balance_hack_mostly', 'balance_hack']);
             break;
         case "story_hack":
-            _keep(hack_types, ['story_hack_wip', 'story_hack_demo', 'story_hack_mostly', 'story_hack']);
+            _keep(hack_types, ['story_hack_wip', 'story_hack_mostly', 'story_hack']);
             break;
         case "translation":
-            _keep(hack_types, ['translation_wip', 'translation_demo', 'translation_mostly', 'translation']);
+            _keep(hack_types, ['translation_wip', 'translation_mostly', 'translation']);
             break;
         case "misc_hack":
-            _keep(hack_types, ['misc_hack_wip', 'misc_hack_demo', 'misc_hack_mostly', 'misc_hack']);
+            _keep(hack_types, ['misc_hack_wip', 'misc_hack_mostly', 'misc_hack']);
             break;
         case "machinima":
             _keep(hack_types, ['machinima_ongoing', 'machinima']);

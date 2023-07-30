@@ -29,19 +29,15 @@
             Hack type*:
             <select name="hack_type" id="hack_type">
               <option value="balance_hack_wip" {% if hack['hack_type'] == 'balance_hack_wip' %}selected{% end %}>Balance Hack (work in progress)</option>
-              <option value="balance_hack_demo" {% if hack['hack_type'] == 'balance_hack_demo' %}selected{% end %}>Balance Hack (with demo)</option>
               <option value="balance_hack_mostly" {% if hack['hack_type'] == 'balance_hack_mostly' %}selected{% end %}>Balance Hack (mostly finished)</option>
               <option value="balance_hack" {% if hack['hack_type'] == 'balance_hack' %}selected{% end %}>Balance Hack (finished)</option>
               <option value="story_hack_wip" {% if hack['hack_type'] == 'story_hack_wip' %}selected{% end %}>Story Hack (work in progress)</option>
-              <option value="story_hack_demo" {% if hack['hack_type'] == 'story_hack_demo' %}selected{% end %}>Story Hack (with demo)</option>
               <option value="story_hack_mostly" {% if hack['hack_type'] == 'story_hack_mostly' %}selected{% end %}>Story Hack (mostly finished)</option>
               <option value="story_hack" {% if hack['hack_type'] == 'story_hack' %}selected{% end %}>Story Hack (finished)</option>
               <option value="translation_wip" {% if hack['hack_type'] == 'translation_wip' %}selected{% end %}>Translation (work in progress)</option>
-              <option value="translation_demo" {% if hack['hack_type'] == 'translation_demo' %}selected{% end %}>Translation (with demo)</option>
               <option value="translation_mostly" {% if hack['hack_type'] == 'translation_mostly' %}selected{% end %}>Translation (mostly finished)</option>
               <option value="translation" {% if hack['hack_type'] == 'translation' %}selected{% end %}>Translation (finished)</option>
               <option value="misc_hack_wip" {% if hack['hack_type'] == 'misc_hack_wip' %}selected{% end %}>Misc. Hack (work in progress)</option>
-              <option value="misc_hack_demo" {% if hack['hack_type'] == 'misc_hack_demo' %}selected{% end %}>Misc. Hack (with demo)</option>
               <option value="misc_hack_mostly" {% if hack['hack_type'] == 'misc_hack_mostly' %}selected{% end %}>Misc. Hack (mostly finished)</option>
               <option value="misc_hack" {% if hack['hack_type'] == 'misc_hack' %}selected{% end %}>Misc. Hack (finished)</option>
               <option value="machinima_ongoing" {% if hack['hack_type'] == 'machinima_ongoing' %}selected{% end %}>Machinima (ongoing)</option>

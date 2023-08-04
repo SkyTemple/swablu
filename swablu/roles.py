@@ -21,7 +21,6 @@ async def check_for(member: Member, role: Role, app_id):
         activity: BaseActivity
         if hasattr(activity, 'application_id') and activity.application_id == app_id:
             should = True
-    logger.info(f'[{member.guild.name}] {member.display_name}? {should}')
     if should and role not in member.roles:
         await member.add_roles(role)
     elif not should and role in member.roles:

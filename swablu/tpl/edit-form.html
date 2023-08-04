@@ -1,7 +1,7 @@
 {% include 'head.html' %}
 <h1>Edit ROM Hack</h1>
 {% if hack['message_id'] %}
-<div><span><em>Your hack micro page is reachable at <a href="https://skytemple.org/h/{{ hack['key'] }}">https://skytemple.org/h/{{ hack['key'] }}</a></em></span></div>
+<div><span><em>Your hack micro page is reachable at <a href="/h/{{ hack['key'] }}">https://skytemple.org/h/{{ hack['key'] }}</a></em></span></div>
 {% end %}
 {% if missing_arg %}
 <div class="red">

@@ -407,11 +407,10 @@ class EditFormHandler(AuthenticatedHandler):
 
         editing = bool(hack['message_id'])
 
-        try:
-            hack['name'] = self.get_body_argument('name')
-            hack['description'] = self.get_body_argument('description')
-            hack['hack_type'] = self.get_body_argument('hack_type')
-        except MissingArgumentError:
+        hack['name'] = self.get_body_argument('name', '')
+        hack['description'] = self.get_body_argument('description', '')
+        hack['hack_type'] = self.get_body_argument('hack_type', '')
+        if hack['name'] == '' or hack['description'] == '' or hack['hack_type'] == '':
             return self.redirect(f'/edit/{hack_id}?missing_arg=1')
         logger.info("name: " + hack['name'])
         hack['url_main'] = self.get_body_argument('url_main', '')

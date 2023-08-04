@@ -413,6 +413,7 @@ class EditFormHandler(AuthenticatedHandler):
             hack['hack_type'] = self.get_body_argument('hack_type')
         except MissingArgumentError:
             return self.redirect(f'/edit/{hack_id}?missing_arg=1')
+        logger.info("name: " + hack['name'])
         hack['url_main'] = self.get_body_argument('url_main', '')
         hack['url_discord'] = self.get_body_argument('url_discord', '')
         hack['url_download'] = self.get_body_argument('url_download', '')

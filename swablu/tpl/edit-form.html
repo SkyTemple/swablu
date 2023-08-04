@@ -68,13 +68,13 @@
             Youtube Video: <input name="video" id="video" placeholder="YouTube URL" value="{{ hack['video'] or '' }}"/>
             <em>Link to a YouTube video to use as a trailer / the first episode of your machinima.</em>
         </label>
-        <button type="submit">Save</button>
         {% if hack['message_id'] %}
         <label for="silent">Slient edit: <input name="silent" type="checkbox" id="silent">
             <br>
             <em>The hack's last modified date will not change.</em>
         </label>
         {% end %}
+        <button type="submit">Save</button>
         <span><em>*: Required</em></span>
     </form>
 </div>

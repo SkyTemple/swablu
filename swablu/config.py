@@ -190,7 +190,7 @@ def vote_jam(dbcon, jam_key, user_id, hack):
     cursor.close()
 
 
-def update_hack(dbcon, hack):
+def update_hack(dbcon, hack, silent=False):
     cursor = db_cursor(dbcon)
     sql = f"UPDATE `{TABLE_NAME}` SET " \
           f"`name` = %s," \
@@ -202,8 +202,7 @@ def update_hack(dbcon, hack):
           f"`url_download` = %s," \
           f"`video` = %s," \
           f"`hack_type` = %s," \
-          f"`message_id` = %s," \
-          f"`date_updated` = NOW()" \
+          f"`message_id` = %s" if silent else f"`message_id` = %s,`date_updated` = NOW()" \
           f" WHERE id = %s"
     cursor.execute(sql, (
         hack['name'],

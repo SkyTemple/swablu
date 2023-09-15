@@ -42,9 +42,7 @@ async def on_ready():
 
 @discord_client.event
 async def on_member_update(before: Member, after: Member):
-    # Only first guild (SkyTemple) and second guild (DreamNexus) supported
-    if after.guild.id == DISCORD_GUILD_IDS[0]:
-        await check_for(after, get_role(after.guild, using_skytemple), skytemple_app_id)
+    # Only second guild (DreamNexus) supported
     if after.guild.id == DISCORD_GUILD_IDS[1]:
         await check_for(after, get_role(after.guild, using_dreamnexus), dreamnexus_app_id)
 
@@ -56,17 +54,9 @@ async def on_message(message: Message):
     if not discord_writes_enabled():
         return
     if message.guild.id in DISCORD_GUILD_IDS:
-        if isinstance(message.channel, TextChannel) and message.channel.name == 'welcome' and message.content == '🎉?':
-            greet_count = 0
-            async with message.channel.typing():
-                async for message in message.channel.history(limit=None):
-                    message: Message
-                    greet_count += sum([r.count for r in message.reactions if r.emoji == '🎉'])
-                await message.channel.send(f'Members have greeted {greet_count} times! 🎉')
-        else:
-            await reputation.process_cmd(message)
-            await hacks_mgmnt.process_cmd(message)
-            await general_memes.process_cmd(message)
+        await reputation.process_cmd(message)
+        await hacks_mgmnt.process_cmd(message)
+        await general_memes.process_cmd(message)
     else:
         await general_memes.process_cmd(message)
 

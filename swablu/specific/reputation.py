@@ -10,6 +10,9 @@ from discord.ext.commands import TextChannelConverter, UserConverter
 from swablu.config import discord_client, DISCORD_GUILD_IDS, database, TABLE_NAME_REPUTATION, db_cursor
 from swablu.util import MiniCtx
 
+# Used to enable/disable the reputation feature
+ENABLED = False
+
 ALLOWED_ROLES = [
     712704493661192275,  # Admin
     712704743419543564,  # Mod
@@ -181,24 +184,25 @@ async def process_checkr(message: Message):
 
 
 async def process_cmd(message: Message):
-    if isinstance(message.channel, TextChannel):
-        if message.channel.id == BOT_DM_CHANNEL:
-            if message.author.id in AUTHORIZED_DM_USERS:
-                await process_cmd_dm(message)
-        else:
-            cmd_parts = message.content.split(' ')
-            try:
-                if cmd_parts[0] == prefix + 'gr' or cmd_parts[0] == prefix + 'tr':
-                    if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
-                        raise RuntimeError("You are not allowed to give or take Guild Points.")
-                    await process_gr(message, message.channel, cmd_parts[0] == prefix + 'tr')
-                elif cmd_parts[0] == prefix + 'checkr':
-                    await process_checkr(message)
-                elif cmd_parts[0] == prefix + 'toprep':
-                    await process_toprep(message)
-            except Exception as ex:
-                logger.error("Error running rep command", exc_info=ex)
-                await message.channel.send(f"Error running this command: {str(ex)}")
+    if ENABLED:
+        if isinstance(message.channel, TextChannel):
+            if message.channel.id == BOT_DM_CHANNEL:
+                if message.author.id in AUTHORIZED_DM_USERS:
+                    await process_cmd_dm(message)
+            else:
+                cmd_parts = message.content.split(' ')
+                try:
+                    if cmd_parts[0] == prefix + 'gr' or cmd_parts[0] == prefix + 'tr':
+                        if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
+                            raise RuntimeError("You are not allowed to give or take Guild Points.")
+                        await process_gr(message, message.channel, cmd_parts[0] == prefix + 'tr')
+                    elif cmd_parts[0] == prefix + 'checkr':
+                        await process_checkr(message)
+                    elif cmd_parts[0] == prefix + 'toprep':
+                        await process_toprep(message)
+                except Exception as ex:
+                    logger.error("Error running rep command", exc_info=ex)
+                    await message.channel.send(f"Error running this command: {str(ex)}")
 
 
 # noinspection PyAttributeOutsideInit,PyAbstractClass,PyShadowingNames
@@ -223,6 +227,9 @@ class GuildPointsHandler(tornado.web.RequestHandler):
 
 
 def collect_web_routes(extra):
-    return [
-        (r"/guildpoints", GuildPointsHandler)
-    ]
+    if ENABLED:
+        return [
+            (r"/guildpoints", GuildPointsHandler)
+        ]
+    else:
+        return []

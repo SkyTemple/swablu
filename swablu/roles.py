@@ -37,11 +37,7 @@ def get_role(guild: Guild, role_name: str):
 
 async def scan_roles():
     logger.info("Periodic scan.")
-    # Only first guild (SkyTemple) and second guild (DreamNexus) supported
-    guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
-    r = get_role(guild, using_skytemple)
-    for m in guild.members:
-        await check_for(m, r, skytemple_app_id)
+    # Only second guild (DreamNexus) supported
     guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[1])
     r = get_role(guild, using_dreamnexus)
     for m in guild.members:

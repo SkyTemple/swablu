@@ -420,11 +420,17 @@ class EditFormHandler(AuthenticatedHandler):
             return self.redirect(f'/edit/{hack_id}?invalid_download_link=1')
         screenshot1 = self.request.files.get('screenshot1', None)
         screenshot2 = self.request.files.get('screenshot2', None)
-        if screenshot1:
+        delete_screenshot_1 = self.get_body_argument('delscreenshot1', '') != ''
+        delete_screenshot_2 = self.get_body_argument('delscreenshot2', '') != ''
+        if delete_screenshot_1:
+            hack['screenshot1'] = None
+        elif screenshot1:
             mime = mimetypes.guess_type(screenshot1[0]['filename'])[0] or "application/octet-stream"
             if mime in ALLOWED_MIMES and len(screenshot1[0]["body"]) <= 1000000:
                 hack['screenshot1'] = f'data:{mime};base64,{str(base64.b64encode(screenshot1[0]["body"]), "ascii")}'
-        if screenshot2:
+        if delete_screenshot_2:
+            hack['screenshot2'] = None
+        elif screenshot2:
             mime = mimetypes.guess_type(screenshot2[0]['filename'])[0] or "application/octet-stream"
             if mime in ALLOWED_MIMES and len(screenshot2[0]["body"]) <= 1000000:
                 hack['screenshot2'] = f'data:{mime};base64,{str(base64.b64encode(screenshot2[0]["body"]), "ascii")}'

@@ -30,8 +30,6 @@ async def regenerate_message(discord_client: Client, channel_id: int, message_id
     return message_id
 
 def get_authors(discord_client, rrole: str, as_names=False):
-    if rrole == 'Hack: PMD: Fragments' and as_names:
-        return 'Irdkwia'
     # Only first guild (SkyTemple) supported
     guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
     authors = '???'

@@ -416,7 +416,7 @@ class EditFormHandler(AuthenticatedHandler):
         hack['url_main'] = self.get_body_argument('url_main', '')
         hack['url_discord'] = self.get_body_argument('url_discord', '')
         hack['url_download'] = self.get_body_argument('url_download', '')
-        if "discord.com/channels/" in hack['url_download']:
+        if "discord.com" in hack['url_download'] or "discordapp.com" in hack['url_download']:
             return self.redirect(f'/edit/{hack_id}?invalid_download_link=1')
         screenshot1 = self.request.files.get('screenshot1', None)
         screenshot2 = self.request.files.get('screenshot2', None)

@@ -10,7 +10,7 @@
 {% end %}
 {% if invalid_download_link %}
 <div class="red">
-    <span>The download link provided is invalid. Please link to the Discord attachment, not to the message.</span>
+    <span>The download link provided is invalid. Discord links are not allowed since they won't work from outside Discord.</span>
 </div>
 {% end %}
 {% if saved %}
@@ -54,7 +54,7 @@
         </label>
         <label for="url_download">
             Download URL: <input name="url_download" id="url_download" placeholder="Download URL" value="{{ hack['url_download'] or '' }}"/>
-            <em>If you have a playable ROM hack, please put the download link here. You can link a Discord embed, but not a Discord message since those can't be accessed from outside the server where they were posted.</em>
+            <em>If you have a playable ROM hack, please put the download link here. You can't link to a Discord embed or a Discord message, since those cannot be accessed from outside Discord.</em>
         </label>
         <label for="screenshot1">
             Screenshot 1: <input name="screenshot1" id="screenshot1" type="file"/>

@@ -1,4 +1,20 @@
 {% include 'head.html' %}
+{% if cannot_vote and cannot_vote == "1" %}
+<div class="red">
+    <span>Error: Voting is not currently active for this jam. Your vote was not saved.</span>
+</div>
+{% end %}
+{% if cannot_vote and cannot_vote == "2" %}
+<div class="red">
+    <span>Error: Jury members cannot cast community votes. Your vote was not saved.</span>
+</div>
+{% end %}
+{% if cannot_vote and cannot_vote == "3" %}
+<div class="red">
+    <span>Error: Your vote was not saved due to an unspecified error.</span>
+</div>
+{% end %}
+<span>Anti-cache counter: 2</span>
 <h3>SkyTemple Hack Jam</h3>
 <h1>{{ jam["motto"] }}</h1>
 <div class="hack-listing jam-details">

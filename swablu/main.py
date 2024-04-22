@@ -57,8 +57,6 @@ async def on_message(message: Message):
         await reputation.process_cmd(message)
         await hacks_mgmnt.process_cmd(message)
         await general_memes.process_cmd(message)
-        if message.content == '!test':
-            await message.channel.send('test')
     else:
         await general_memes.process_cmd(message)
 

@@ -376,7 +376,7 @@ class JamVoteHandler(AuthenticatedHandler):
         except Exception as ex:
             logger.warning("Jam vote error.", exc_info=ex)
 
-        if jam is None or hack is None and self._voting_allowed(jam, self.user_id):
+        if jam is None or hack is None:
             return self.redirect('https://skytemple.org')
         else:
             voting_allowed = await self._voting_allowed(jam, self.user_id)

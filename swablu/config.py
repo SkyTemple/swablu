@@ -33,6 +33,7 @@ DISCORD_ADMIN_ROLES = [int(x) for x in os.environ['DISCORD_ADMIN_ROLE'].split(',
 if 'DISCORD_CHANNEL_HACKS' not in os.environ:
     raise ValueError("No env DISCORD_CHANNEL_HACKS.")
 DISCORD_CHANNEL_HACKS = int(os.environ['DISCORD_CHANNEL_HACKS'])
+DISCORD_JAM_JURY_ROLE = int(os.environ['DISCORD_JAM_JURY_ROLE'])
 if 'PORT' not in os.environ:
     raise ValueError("No env PORT.")
 PORT = os.environ['PORT']

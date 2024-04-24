@@ -14,10 +14,13 @@ from swablu.web import invalidate_cache
 ALLOWED_ROLES = [
     712704493661192275,  # Admin
     712704743419543564,  # Mod
+    367451227551694852,  # Test server - Admin
+    367451406468382722,  # Test server - Mod
 ]
 
 ALLOWED_ROLES_DELETE = [
     712704493661192275,  # Admin
+    367451227551694852,  # Test server - Admin
 ]
 
 prefix = '!'

@@ -24,11 +24,12 @@ from tornado.web import MissingArgumentError
 from swablu.config import discord_client, database, AUTHORIZATION_BASE_URL, OAUTH2_REDIRECT_URI, OAUTH2_CLIENT_ID, \
     OAUTH2_CLIENT_SECRET, TOKEN_URL, API_BASE_URL, DISCORD_GUILD_IDS, DISCORD_ADMIN_ROLES, get_rom_hacks, \
     regenerate_htaccess, DISCORD_CHANNEL_HACKS, update_hack, get_rom_hack, get_jam, vote_jam, discord_writes_enabled, \
-    get_jams, get_rom_hack_img
-from swablu.discord_util import regenerate_message, get_authors
+    get_jams, get_rom_hack_img, DISCORD_JAM_JURY_ROLE
+from swablu.discord_util import regenerate_message, get_authors, has_role
 from swablu.roles import get_hack_type_str
 from swablu.specific import reputation
 from swablu.specific.translate_webhook import TranslateHookHandler
+from swablu.util import VotingAllowedStatus
 
 OAUTH_SCOPE = ['identify']
 DEFAULT_AUTHOR_DESCRIPTION = {
@@ -350,6 +351,7 @@ class JamHandler(CacheableHandler):
                               jam_key=kwargs['jam_key'],
                               title=f'SkyTemple Hack Jam - {jam["motto"]}',
                               jam=jam,
+                              cannot_vote=self.get_argument('cannot_vote', ''),
                               winners=winners,
                               others=left,
                               hackdata=hackdata, award_groups=award_groups,
@@ -374,21 +376,41 @@ class JamVoteHandler(AuthenticatedHandler):
         except Exception as ex:
             logger.warning("Jam vote error.", exc_info=ex)
 
-        if jam is not None and 'voting_enabled' in jam and jam['voting_enabled'] and hack is not None:
-            try:
-                vote_jam(self.db, kwargs['jam_key'], self.user_id, kwargs['hack_id'])
-            except:
-                logger.error("Jam vote error.", exc_info=ex)
-                raise
-            await self.render('voted_jam.html',
-                              jam_key=kwargs['jam_key'],
-                              title=f'SkyTemple Hack Jam - {jam["motto"]} - You voted!',
-                              jam=jam,
-                              hack=hack,
-                              description=jam['description'],
-                              author="SkyTemple Community")
-            return
-        return self.redirect('https://skytemple.org')
+        if jam is None or hack is None:
+            return self.redirect('https://skytemple.org')
+        else:
+            voting_allowed = await self._voting_allowed(jam, self.user_id)
+            if voting_allowed == VotingAllowedStatus.ALLOWED:
+                try:
+                    vote_jam(self.db, kwargs['jam_key'], self.user_id, kwargs['hack_id'])
+                except:
+                    logger.error("Jam vote error.", exc_info=ex)
+                    raise
+                await self.render('voted_jam.html',
+                                  jam_key=kwargs['jam_key'],
+                                  title=f'SkyTemple Hack Jam - {jam["motto"]} - You voted!',
+                                  jam=jam,
+                                  hack=hack,
+                                  description=jam['description'],
+                                  author="SkyTemple Community")
+                return
+            elif voting_allowed == VotingAllowedStatus.NOT_ALLOWED_CLOSED:
+                return self.redirect(f'/jam/{kwargs["jam_key"]}?cannot_vote=1')
+            elif voting_allowed == VotingAllowedStatus.NOT_ALLOWED_JURY:
+                return self.redirect(f'/jam/{kwargs["jam_key"]}?cannot_vote=2')
+            else:
+                # Fallback message
+                return self.redirect(f'/jam/{kwargs["jam_key"]}?cannot_vote=3')
+
+    async def _voting_allowed(self, jam, user_id) -> VotingAllowedStatus:
+        if 'voting_enabled' not in jam:
+            return VotingAllowedStatus.NOT_ALLOWED_CLOSED
+        if not jam['voting_enabled']:
+            return VotingAllowedStatus.NOT_ALLOWED_CLOSED
+        # Jury members cannot vote
+        if await has_role(self.discord_client, user_id, DISCORD_JAM_JURY_ROLE):
+            return VotingAllowedStatus.NOT_ALLOWED_JURY
+        return VotingAllowedStatus.ALLOWED
 
 
 # noinspection PyAbstractClass

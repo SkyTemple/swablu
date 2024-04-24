@@ -1,6 +1,7 @@
 import time
 from typing import Optional
 
+import discord
 from discord import Client, TextChannel, Guild
 
 from swablu.config import DISCORD_GUILD_IDS
@@ -43,3 +44,21 @@ def get_authors(discord_client, rrole: str, as_names=False):
                     authors.append(f'<@{member.id}>')
             authors = ', '.join(authors)
     return authors
+
+
+async def has_role(discord_client: discord.Client, user_id: int, role_id: int) -> bool:
+    """
+    Checks if the given user has the given role on the server set in the config (DISCORD_GUILD_ID environment variable).
+    :param discord_client: Discord client
+    :param user_id: User to check
+    :param role_id: Role to check
+    :return: True if the user has the specified role, false otherwise
+    """
+    guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
+    role = guild.get_role(role_id)
+    try:
+        user = await guild.fetch_member(user_id)
+    except discord.NotFound:
+        return False
+
+    return role in user.roles

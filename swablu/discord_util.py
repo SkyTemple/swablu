@@ -39,7 +39,7 @@ def get_authors(discord_client, rrole: str, as_names=False):
             authors = []
             for member in role.members:
                 if as_names:
-                    authors.append(f'{member.name}#{member.discriminator}')
+                    authors.append(member.name)
                 else:
                     authors.append(f'<@{member.id}>')
             authors = ', '.join(authors)

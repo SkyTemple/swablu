@@ -337,7 +337,7 @@ class JamHandler(CacheableHandler):
                                 hackdata[hack]['awards'].append(award)
             for dq in jam['dq']:
                 member = discord_client.get_user(int(dq['author']))
-                dq['author'] = f'{member.name}#{member.discriminator}'
+                dq['author'] = member.name
             award_groups = {}
             if 'awards' in jam:
                 for award in jam['awards']['golden'].keys():

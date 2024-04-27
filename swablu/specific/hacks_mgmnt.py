@@ -9,7 +9,7 @@ from swablu.util import MiniCtx
 from swablu.config import database, TABLE_NAME, discord_client, discord_writes_enabled, get_jam, get_rom_hacks, \
     jam_exists, update_jam, create_jam, db_cursor, DISCORD_CHANNEL_HACKS
 from swablu.discord_util import regenerate_message
-from swablu.web import invalidate_cache
+from swablu.web import invalidate_cache, invalidate_jam_cache
 
 ALLOWED_ROLES = [
     712704493661192275,  # Admin
@@ -99,7 +99,7 @@ async def process_create_jam(message: Message, channel: TextChannel):
         raise ValueError("This jam already exists. Use !update_jam.")
 
     create_jam(database, jam_key, jam_data)
-    invalidate_cache(f'jam-{jam_key}')
+    invalidate_jam_cache(jam_key, jam_data)
     await channel.send("OK")
 
 
@@ -116,7 +116,7 @@ async def process_update_jam(message: Message, channel: TextChannel):
         raise ValueError("This jam does not exist. Use !create_jam.")
 
     update_jam(database, jam_key, jam_data)
-    invalidate_cache(f'jam-{jam_key}')
+    invalidate_jam_cache(jam_key, jam_data)
     await channel.send("OK")
 
 

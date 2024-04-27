@@ -57,6 +57,17 @@ def invalidate_cache(cache_tags):
     else:
         logger.info(f'Cleared cache ({cache_tags})')
 
+
+def invalidate_jam_cache(jam_key: str, jam_data: str):
+    tags_to_purge = [f'jam-{jam_key}']
+
+    jam_data_json = json.loads(jam_data)
+    for hack in jam_data_json["hacks"]:
+        tags_to_purge.append(f'hack-{hack}')
+
+    invalidate_cache(tags_to_purge)
+
+
 class SessionTokenProvider:
     tokens = {}
 

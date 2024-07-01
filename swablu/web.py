@@ -14,6 +14,7 @@ from typing import Optional, Union
 import tornado.web
 import os
 from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2.rfc6749.errors import InvalidGrantError
 
 
 from discord import Client, Guild, Member
@@ -157,7 +158,22 @@ class AuthenticatedHandler(BaseHandler, ABC):
         super().__init__(application, request, **kwargs)
 
     async def auth(self, ignore_no_hacks=False):
-        if not self.get_secure_cookie('session_id'):
+        user_id = None
+        auth_successful = False
+        if self.get_secure_cookie('session_id'):
+            sc = str(self.get_secure_cookie('session_id'), 'utf-8')
+            discord = self.make_session(token=SessionTokenProvider.get(sc))
+            try:
+                user = discord.get(API_BASE_URL + '/users/@me').json()
+                if 'id' in user:
+                    user_id = user['id']
+                    auth_successful = True
+                else:
+                    logger.warning(f"OAuth login error: {sc} - {user}")
+            except InvalidGrantError:
+                logger.warning(f"OAuth invalid grant error: {sc}")
+
+        if not auth_successful:
             discord_session = self.make_session(scope=OAUTH_SCOPE)
             authorization_url, state = discord_session.authorization_url(AUTHORIZATION_BASE_URL)
             self.set_cookie('oauth2_state', state)
@@ -165,19 +181,6 @@ class AuthenticatedHandler(BaseHandler, ABC):
             self.redirect(authorization_url, permanent=False)
             return False
 
-        sc = str(self.get_secure_cookie('session_id'), 'utf-8')
-        discord = self.make_session(token=SessionTokenProvider.get(sc))
-        user = discord.get(API_BASE_URL + '/users/@me').json()
-        if 'id' in user:
-            user_id = user['id']
-        else:
-            logger.warning(f"OAuth login error: {sc} - {user}")
-            discord_session = self.make_session(scope=OAUTH_SCOPE)
-            authorization_url, state = discord_session.authorization_url(AUTHORIZATION_BASE_URL)
-            self.set_cookie('oauth2_state', state)
-            self.set_secure_cookie('callback_url', self.request.uri)
-            self.redirect(authorization_url, permanent=False)
-            return False
         # Only first guild (SkyTemple) supported
         guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
         self.user_id = user_id

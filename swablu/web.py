@@ -14,8 +14,7 @@ from typing import Optional, Union
 import tornado.web
 import os
 from requests_oauthlib import OAuth2Session
-from oauthlib.oauth2.rfc6749.errors import InvalidGrantError
-
+from oauthlib.oauth2.rfc6749.errors import InvalidGrantError, TokenExpiredError
 
 from discord import Client, Guild, Member
 from mysql.connector import MySQLConnection
@@ -172,6 +171,8 @@ class AuthenticatedHandler(BaseHandler, ABC):
                     logger.warning(f"OAuth login error: {sc} - {user}")
             except InvalidGrantError:
                 logger.warning(f"OAuth invalid grant error: {sc}")
+            except TokenExpiredError:
+                logger.warning(f"OAuth token expired error: {sc}")
 
         if not auth_successful:
             discord_session = self.make_session(scope=OAUTH_SCOPE)

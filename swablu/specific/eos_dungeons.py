@@ -44,6 +44,12 @@ import cairo
 from PIL import Image
 from discord import TextChannel, Message, Embed, Colour, Attachment, File
 from ndspy.rom import NintendoDSRom
+
+from skytemple_files.common.impl_cfg import change_implementation_type, ImplementationType
+from skytemple_files.dungeon_data.mappa_bin.mappa_xml import mappa_floor_from_xml
+
+change_implementation_type(ImplementationType.NATIVE)
+
 from skytemple_dtef.explorers_dtef import ExplorersDtef
 from skytemple_dtef.explorers_dtef_importer import ExplorersDtefImporter
 from skytemple_files.common.dungeon_floor_generator.generator import DungeonFloorGenerator, Tile, RandomGenProperties, \
@@ -53,17 +59,15 @@ from skytemple_files.common.types.file_types import FileType
 from skytemple_files.common.xml_util import XmlValidateError
 from skytemple_files.container.bin_pack.model import BinPack
 from skytemple_files.container.dungeon_bin.model import DungeonBinPack
-from skytemple_files.data.item_p.model import ItemP
-from skytemple_files.data.md.model import Md
+from skytemple_files.data.item_p.protocol import ItemPProtocol
+from skytemple_files.data.md.protocol import MdProtocol
 from skytemple_files.dungeon_data.fixed_bin.model import DirectRule, FixedFloor, TileRuleType, TileRule, FloorType, \
     EntityRule
-from skytemple_files.dungeon_data.mappa_bin.floor import MappaFloor
-from skytemple_files.dungeon_data.mappa_bin.item_list import GUARANTEED, POKE_ID
-from skytemple_files.dungeon_data.mappa_bin.trap_list import MappaTrapType
+from skytemple_files.dungeon_data.mappa_bin.protocol import MappaFloorProtocol, GUARANTEED, POKE_ID, MappaTrapType
 from skytemple_files.graphics.dma.dma_drawer import DmaDrawer
-from skytemple_files.graphics.dma.model import DmaType
-from skytemple_files.graphics.dpc.model import DPC_TILING_DIM
-from skytemple_files.graphics.dpci.model import DPCI_TILE_DIM
+from skytemple_files.graphics.dma.protocol import DmaType
+from skytemple_files.graphics.dpc import DPC_TILING_DIM
+from skytemple_files.graphics.dpci import DPCI_TILE_DIM
 from skytemple_files.graphics.img_itm.model import ImgItm
 from skytemple_files.graphics.img_trp.model import ImgTrp
 from skytemple_files.graphics.wan_wat.model import Wan
@@ -81,6 +85,9 @@ DTEF_XML_NAME = "tileset.dtef.xml"
 DTEF_VAR0_FN = 'tileset_0.png'
 DTEF_VAR1_FN = 'tileset_1.png'
 DTEF_VAR2_FN = 'tileset_2.png'
+STATIC_DATA = Pmd2XmlReader.load_default()
+ITEM_CATEGORIES = STATIC_DATA.dungeon_data.item_categories
+ITEM_CATEGORIES_BY_NAME = {x.name: x for x in ITEM_CATEGORIES.values()}
 
 
 class UserError(Exception):
@@ -247,7 +254,7 @@ async def process_message(message: Message) -> bool:
                 raise UserError("XML Error", f"The floor XML you provided can't be parsed: {str(er)}")
 
             try:
-                floor: MappaFloor = MappaFloor.from_xml(xml)
+                floor: MappaFloorProtocol = mappa_floor_from_xml(xml, ITEM_CATEGORIES_BY_NAME)
             except XmlValidateError as er:
                 raise UserError("XML Error", f"The floor XML you provided is invalid: {str(er)}")
 
@@ -330,7 +337,7 @@ TRP_FILENAME = 'traps.trp.img'
 ITM_FILENAME = 'items.itm.img'
 
 
-def generate_floor(options: Options, in_floor: MappaFloor, tileset: Tuple[Dma, Dpc, Dpci, Dpl, Dpla]) -> BytesIO:
+def generate_floor(options: Options, in_floor: MappaFloorProtocol, tileset: Tuple[Dma, Dpc, Dpci, Dpl, Dpla]) -> BytesIO:
     try:
         rng = random.Random(int(options.seed))
     except ValueError:
@@ -343,11 +350,10 @@ def generate_floor(options: Options, in_floor: MappaFloor, tileset: Tuple[Dma, D
     if floor is None:
         raise UserError("Internal Error", "The floor generator failed to generate a floor from these settings.")
 
-    item_cats = Pmd2XmlReader.load_default().dungeon_data.item_categories
     actions = []
     warnings = set()
-    open_guaranteed_floor = set(x.id for x, y in in_floor.floor_items.items.items() if y == GUARANTEED)
-    open_guaranteed_buried = set(x.id for x, y in in_floor.buried_items.items.items() if y == GUARANTEED)
+    open_guaranteed_floor = set(x for x, y in in_floor.floor_items.items.items() if y == GUARANTEED)
+    open_guaranteed_buried = set(x for x, y in in_floor.buried_items.items.items() if y == GUARANTEED)
     for x in floor:
         idx = None
         if x.typ == TileType.PLAYER_SPAWN:
@@ -357,7 +363,7 @@ def generate_floor(options: Options, in_floor: MappaFloor, tileset: Tuple[Dma, D
             last = 383  # Kecleon - fallback
             invalid = True
             for m in in_floor.monsters:
-                if m.weight > ridx and m.weight != 0:
+                if m.main_spawn_weight > ridx and m.main_spawn_weight != 0:
                     last = m.md_index
                     invalid = False
                     break
@@ -376,11 +382,11 @@ def generate_floor(options: Options, in_floor: MappaFloor, tileset: Tuple[Dma, D
                 item_list = in_floor.buried_items
             for c, prop in item_list.categories.items():
                 if prop > ridx_cat and prop != 0:
-                    last_cat = c.value
+                    last_cat = c
                     break
             for itm, prop in item_list.items.items():
-                if prop > ridx_itm and prop != GUARANTEED and prop != 0 and itm.id in item_cats[last_cat].item_ids():
-                    last_item = itm.id
+                if prop > ridx_itm and prop != GUARANTEED and prop != 0 and itm in ITEM_CATEGORIES[last_cat].item_ids():
+                    last_item = itm
                     break
             idx = last_item
         if x.typ == TileType.TRAP:
@@ -388,7 +394,7 @@ def generate_floor(options: Options, in_floor: MappaFloor, tileset: Tuple[Dma, D
             last = 0  # fallback
             for trap, weight in in_floor.traps.weights.items():
                 if weight > ridx and weight != 0:
-                    last = trap.value
+                    last = trap
                     break
             idx = last
         actions.append(DirectRule(x, idx))
@@ -595,11 +601,11 @@ def pil_to_cairo_surface(im, format=cairo.FORMAT_ARGB32) -> cairo.ImageSurface:
 class SpriteProvider:
     def __init__(self):
         with open(os.path.join(asset_path(), "dungeon.bin"), "rb") as f:
-            self.dungeon_bin: DungeonBinPack = FileType.DUNGEON_BIN.deserialize(f.read(), static_data=Pmd2XmlReader.load_default())
+            self.dungeon_bin: DungeonBinPack = FileType.DUNGEON_BIN.deserialize(f.read(), static_data=STATIC_DATA)
         with open(os.path.join(asset_path(), "item_p.bin"), "rb") as f:
-            self.item_p: ItemP = FileType.ITEM_P.deserialize(f.read())
+            self.item_p: ItemPProtocol = FileType.ITEM_P.deserialize(f.read())
         with open(os.path.join(asset_path(), "monster.md"), "rb") as f:
-            self.monster_md: Md = FileType.MD.deserialize(f.read())
+            self.monster_md: MdProtocol = FileType.MD.deserialize(f.read())
         with open(os.path.join(asset_path(), "monster.bin"), "rb") as f:
             self.monster_bin: BinPack = FileType.BIN_PACK.deserialize(f.read())
 
@@ -636,7 +642,7 @@ class SpriteProvider:
             frame_id = direction_id - 1 if direction_id > 0 else 0
             mfg_id = ani_group[frame_id].frames[0].frame_id
 
-            sprite_img, (cx, cy) = sprite.render_frame_group(sprite.frame_groups[mfg_id])
+            sprite_img, (cx, cy) = sprite.render_frame(sprite.frames[mfg_id])
             return sprite_img, cx, cy, sprite_img.width, sprite_img.height
         except BaseException as e:
             raise RuntimeError(f"Error loading monster sprite for {md_index}") from e
@@ -668,7 +674,7 @@ if __name__ == "__main__":
     with open(os.path.join(OUT_PATH, "dungeon.bin"), "wb") as f:
         dungeon_bin_bytes = rom.getFileByName(DUNGEON_BIN)
         f.write(dungeon_bin_bytes)
-        dungeon_bin = FileType.DUNGEON_BIN.deserialize(dungeon_bin_bytes, Pmd2XmlReader.load_default())
+        dungeon_bin = FileType.DUNGEON_BIN.deserialize(dungeon_bin_bytes, STATIC_DATA)
 
     # /base.dma
     with open(os.path.join(OUT_PATH, "base.dma"), "wb") as f:

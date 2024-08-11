@@ -7,6 +7,7 @@ services:
       DISCORD_GUILD_ID: "..."
       DISCORD_ADMIN_ROLE: "..."
       DISCORD_CHANNEL_HACKS: "..."
+      DISCORD_CHANNEL_FLOOR_GENERATOR_BOT: "..."
       DISCORD_JAM_JURY_ROLE: "..."
       MYSQL_HOST: db
       MYSQL_PORT: "3306"

@@ -74,11 +74,8 @@ from skytemple_rust.st_dpl import Dpl
 from skytemple_rust.st_dpla import Dpla
 
 if __name__ != "__main__":
-    from swablu.config import discord_writes_enabled, discord_client
+    from swablu.config import discord_writes_enabled, discord_client, DISCORD_CHANNEL_FLOOR_GENERATOR_BOT
 
-ENABLED_CHANNELS = [
-    967545456592846928  # SkyTemple / #floor-generator-bot
-]
 logger = logging.getLogger(__name__)
 DTEF_XML_NAME = "tileset.dtef.xml"
 DTEF_VAR0_FN = 'tileset_0.png'
@@ -186,23 +183,24 @@ class Options:
 async def start():
     if not discord_writes_enabled():
         return
-    for channel_id in ENABLED_CHANNELS:
-        try:
-            channel: TextChannel = discord_client.get_channel(channel_id)
 
-            first_message_by_me: Optional[Message] = None
-            async for message in channel.history(limit=50, oldest_first=True):
-                if message.author.id == discord_client.user.id:
-                    first_message_by_me = message
-                    break
+    try:
+        channel: TextChannel = discord_client.get_channel(DISCORD_CHANNEL_FLOOR_GENERATOR_BOT)
 
-            if first_message_by_me is not None:
-                await first_message_by_me.edit(content=__doc__)
-            else:
-                await channel.send(content=__doc__)
+        first_message_by_me: Optional[Message] = None
+        async for message in channel.history(limit=50, oldest_first=True):
+            if message.author.id == discord_client.user.id:
+                first_message_by_me = message
+                break
 
-        except Exception as exc:
-            logger.exception(f"Failed setting up eos_dungeons for {channel_id}.", exc_info=exc)
+        if first_message_by_me is not None:
+            await first_message_by_me.edit(content=__doc__)
+        else:
+            await channel.send(content=__doc__)
+
+    except Exception as exc:
+        logger.exception(f"Failed setting up eos_dungeons for channel {DISCORD_CHANNEL_FLOOR_GENERATOR_BOT}.",
+            exc_info=exc)
 
 
 async def process_message(message: Message) -> bool:
@@ -212,7 +210,7 @@ async def process_message(message: Message) -> bool:
     if message.author.id == discord_client.user.id:
         return False
 
-    if message.channel.id not in ENABLED_CHANNELS:
+    if message.channel.id != DISCORD_CHANNEL_FLOOR_GENERATOR_BOT:
         return False
 
     if len(message.attachments) < 1:

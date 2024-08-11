@@ -38,6 +38,8 @@ def get_role(guild: Guild, role_name: str):
 async def scan_roles():
     logger.info("Periodic scan.")
     # Only second guild (DreamNexus) supported
+    if len(DISCORD_GUILD_IDS) < 2:
+        return
     guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[1])
     r = get_role(guild, using_dreamnexus)
     for m in guild.members:

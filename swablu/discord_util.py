@@ -2,13 +2,14 @@ import time
 from typing import Optional
 
 import discord
-from discord import Client, TextChannel, Guild
+from discord import Client, TextChannel, User
 
-from swablu.config import DISCORD_GUILD_IDS
+from swablu.config import DISCORD_GUILD_IDS, discord_client, get_hack_authors
 from swablu.roles import get_hack_type_str
 
-async def regenerate_message(discord_client: Client, channel_id: int, message_id: Optional['int'], hack: dict):
-    authors = get_authors(discord_client, hack['role_name'], False)
+
+async def regenerate_message(dbcon, discord_client: Client, channel_id: int, message_id: Optional['int'], hack: dict):
+    authors = get_hack_author_mentions_str(dbcon, hack['key'])
     text = f'**{hack["name"]}** by {authors} ({get_hack_type_str(hack["hack_type"])}):\n<https://hacks.skytemple.org/h/{hack["key"]}>'
     channel: TextChannel = discord_client.get_channel(channel_id)
     try_count = 0
@@ -30,19 +31,27 @@ async def regenerate_message(discord_client: Client, channel_id: int, message_id
 
     return message_id
 
-def get_authors(discord_client, rrole: str, as_names=False):
-    # Only first guild (SkyTemple) supported
+
+def get_hack_author_names_str(dbcon, hack_key: str) -> str:
+    author_ids = get_hack_authors(dbcon, hack_key)
+    author_usernames = get_usernames(author_ids)
+    return ", ".join(author_usernames)
+
+
+def get_hack_author_mentions_str(dbcon, hack_key: str) -> str:
+    author_ids = get_hack_authors(dbcon, hack_key)
+    author_mentions = [f"<@{_id}>" for _id in author_ids]
+    return ", ".join(author_mentions)
+
+
+def get_hack_author_ids_legacy(discord_client, role_name: str) -> list[int]:
+    # Only first guild supported
     guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
-    authors = '???'
+    authors = []
     for role in guild.roles:
-        if role.name == rrole:
-            authors = []
+        if role.name == role_name:
             for member in role.members:
-                if as_names:
-                    authors.append(member.name)
-                else:
-                    authors.append(f'<@{member.id}>')
-            authors = ', '.join(authors)
+                authors.append(member.id)
     return authors
 
 
@@ -62,3 +71,18 @@ async def has_role(discord_client: discord.Client, user_id: int, role_id: int) -
         return False
 
     return role in user.roles
+
+
+def get_username(discord_id: int) -> str:
+    try:
+        u: User = discord_client.get_user(discord_id)
+        # if the discriminator is 0, they are using the name discord name system.
+        if u.discriminator == "0":
+            return u.name
+        return u.name + '#' + u.discriminator
+    except:
+        return f'<@{discord_id}>'
+
+
+def get_usernames(discord_ids: list[int]) -> list[str]:
+    return [get_username(discord_id) for discord_id in discord_ids]

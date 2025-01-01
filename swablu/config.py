@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from time import sleep
+from typing import Optional
 
 import discord
 import pkg_resources
@@ -14,7 +15,8 @@ intents.members = True
 intents.presences = True
 intents.guild_messages = True
 discord_client = discord.Client(intents=intents)
-TABLE_NAME = 'rom_hacks'
+TABLE_NAME_HACKS = 'rom_hacks'
+TABLE_NAME_AUTHORS = 'hack_authors'
 TABLE_NAME_REPUTATION = 'rep'
 TABLE_NAME_JAM = 'jam'
 TABLE_NAME_JAM_VOTES = 'jam_votes'
@@ -80,22 +82,20 @@ def check_table_exists(dbcon, tablename):
         return True
 
 
-def get_rom_hacks(dbcon, filter=None, sorted=False):
+def get_rom_hacks(dbcon, filter_author_id: Optional[int] = None, sorted=False):
     cursor = db_cursor(dbcon, dictionary=True, buffered=True)
-    if filter is None:
-        sql = f"SELECT * FROM `{TABLE_NAME}`"
-        if sorted:
-            sql += f" ORDER BY date_updated DESC, name ASC"
-        cursor.execute(sql)
+
+    sql = f"SELECT * FROM `{TABLE_NAME_HACKS}`"
+    if filter_author_id:
+        sql += f" INNER JOIN {TABLE_NAME_AUTHORS} USING (`id`) WHERE author_id = %s"
+    if sorted:
+        sql += f" ORDER BY date_updated DESC, name ASC"
+
+    if filter_author_id:
+        cursor.execute(sql, (filter_author_id,))
     else:
-        if len(filter) < 1:
-            cursor.close()
-            return []
-        format_strings = ','.join(['%s'] * len(filter))
-        sql = f"SELECT * FROM `{TABLE_NAME}` WHERE role_name IN (%s)"
-        if sorted:
-            sql += f" ORDER BY date_updated DESC, name DESC"
-        cursor.execute(sql % format_strings, tuple(filter))
+        cursor.execute(sql)
+
     d = []
     for k in cursor.fetchall():
         d.append(k)
@@ -106,12 +106,22 @@ def get_rom_hacks(dbcon, filter=None, sorted=False):
 
 def get_rom_hack(dbcon, key):
     cursor = db_cursor(dbcon, dictionary=True, buffered=True)
-    sql = f"SELECT * FROM `{TABLE_NAME}` WHERE `key` = %s"
+    sql = f"SELECT * FROM `{TABLE_NAME_HACKS}` WHERE `key` = %s"
     cursor.execute(sql, (key,))
     d = cursor.fetchone()
     dbcon.commit()
     cursor.close()
     return d
+
+
+def get_rom_hack_id(dbcon, key) -> int:
+    cursor = db_cursor(dbcon, dictionary=True, buffered=True)
+    sql = f"SELECT id FROM `{TABLE_NAME_HACKS}` WHERE `key` = %s"
+    cursor.execute(sql, (key,))
+    d = cursor.fetchone()
+    dbcon.commit()
+    cursor.close()
+    return d['id']
 
 
 def get_rom_hack_img(dbcon, key, id):
@@ -122,7 +132,7 @@ def get_rom_hack_img(dbcon, key, id):
         field = 'screenshot2'
     if field:
         cursor = db_cursor(dbcon, dictionary=True, buffered=True)
-        sql = f"SELECT `{field}` FROM `{TABLE_NAME}` WHERE `key` = %s"
+        sql = f"SELECT `{field}` FROM `{TABLE_NAME_HACKS}` WHERE `key` = %s"
         cursor.execute(sql, (key,))
         d = cursor.fetchone()
         dbcon.commit()
@@ -131,6 +141,22 @@ def get_rom_hack_img(dbcon, key, id):
         if v != 'None':
             return v
     return None
+
+
+def get_hack_authors(dbcon, hack_key: str) -> list[int]:
+    cursor = db_cursor(dbcon, dictionary=True, buffered=True)
+    sql = (
+        f"SELECT author_id FROM {TABLE_NAME_HACKS} "
+        f"INNER JOIN {TABLE_NAME_AUTHORS} USING (`id`) "
+        "WHERE `key` = %s"
+    )
+    cursor.execute(sql, (hack_key,))
+    d = []
+    for k in cursor.fetchall():
+        d.append(k['author_id'])
+    dbcon.commit()
+    cursor.close()
+    return d
 
 
 def get_jams(dbcon):
@@ -199,7 +225,7 @@ def update_hack(dbcon, hack, silent=False):
     date_updated_update = ""
     if not silent:
         date_updated_update = ",`date_updated` = NOW()"
-    sql = f"UPDATE `{TABLE_NAME}` SET " \
+    sql = f"UPDATE `{TABLE_NAME_HACKS}` SET " \
           f"`name` = %s," \
           f"`description` = %s," \
           f"`screenshot1` = %s," \
@@ -228,6 +254,34 @@ def update_hack(dbcon, hack, silent=False):
     cursor.close()
 
 
+def update_hack_authors(dbcon, hack_key: str, author_list: list[int]):
+    cursor = db_cursor(dbcon)
+
+    hack_id = get_rom_hack_id(dbcon, hack_key)
+
+    sql = (
+        f"DELETE FROM {TABLE_NAME_AUTHORS} WHERE id = %s"
+    )
+    cursor.execute(sql, (hack_id,))
+
+    if len(author_list) > 0:
+        # Remove potential duplicates
+        author_list = list(set(author_list))
+
+        authors_str = ""
+        for author_id in author_list:
+            authors_str += f"({hack_id}, {author_id}),"
+        authors_str = authors_str.removesuffix(",")
+
+        sql = (
+            f"INSERT INTO {TABLE_NAME_AUTHORS} (`id`, `author_id`) VALUES {authors_str}"
+        )
+        cursor.execute(sql)
+
+    dbcon.commit()
+    cursor.close()
+
+
 def regenerate_htaccess():
     logger.info("Regenerating htaccess...")
     with open(MANAGED_HTACCESS_FILE, 'w') as f:
@@ -246,12 +300,12 @@ while database is None:
         logger.warning("Connecting failed. Retrying...", exc_info=ex)
         sleep(5)
 
-if not check_table_exists(database, TABLE_NAME):
+if not check_table_exists(database, TABLE_NAME_HACKS):
     dbcur = db_cursor(database)
     logger.info("Creating hacks table...")
     # Could surely be optimized, but fine for now.
     dbcur.execute(f"""
-    CREATE TABLE `{TABLE_NAME}` (
+    CREATE TABLE `{TABLE_NAME_HACKS}` (
         `id` INT(10) unsigned NOT NULL AUTO_INCREMENT,
         `key` VARCHAR(80) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
         `name` VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_bin,
@@ -273,6 +327,21 @@ if not check_table_exists(database, TABLE_NAME):
     dbcur.close()
 else:
     logger.info("Hacks table existed!")
+
+if not check_table_exists(database, TABLE_NAME_AUTHORS):
+    dbcur = db_cursor(database)
+    logger.info("Creating authors table...")
+    # Could surely be optimized, but fine for now.
+    dbcur.execute(f"""
+    CREATE TABLE `{TABLE_NAME_AUTHORS}` (
+        `id` INT(10) unsigned NOT NULL,
+        `author_id` BIGINT(30) unsigned NOT NULL,
+        PRIMARY KEY (`id`, `author_id`)
+    );
+    """)
+    dbcur.close()
+else:
+    logger.info("Authors table existed!")
 
 if not check_table_exists(database, TABLE_NAME_REPUTATION):
     dbcur = db_cursor(database)

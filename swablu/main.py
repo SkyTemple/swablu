@@ -43,7 +43,7 @@ async def on_ready():
 @discord_client.event
 async def on_member_update(before: Member, after: Member):
     # Only second guild (DreamNexus) supported
-    if len(DISCORD_GUILD_IDS > 1) and after.guild.id == DISCORD_GUILD_IDS[1]:
+    if len(DISCORD_GUILD_IDS) > 1 and after.guild.id == DISCORD_GUILD_IDS[1]:
         await check_for(after, get_role(after.guild, using_dreamnexus), dreamnexus_app_id)
 
 

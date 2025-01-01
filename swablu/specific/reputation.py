@@ -1,13 +1,14 @@
 import json
 import logging
 import traceback
-from typing import List, Tuple, NamedTuple
+from typing import List, NamedTuple
 
 import tornado.web
 from discord import Message, TextChannel, User
 from discord.ext.commands import TextChannelConverter, UserConverter
 
 from swablu.config import discord_client, DISCORD_GUILD_IDS, database, TABLE_NAME_REPUTATION, db_cursor
+from swablu.discord_util import get_username
 from swablu.util import MiniCtx
 
 # Used to enable/disable the reputation feature
@@ -65,17 +66,6 @@ def give_guild_points_to(user: User, amount: int):
     cursor.close()
 
 
-def _get_username(id: int):
-    try:
-        u: User = discord_client.get_user(id)
-        # if the discriminator is 0, they are using the name discord name system.
-        if u.discriminator == 0:
-            return u.name
-        return u.name + '#' + u.discriminator
-    except:
-        return f'<@{id}>'
-
-
 class GuidPointResults(NamedTuple):
     idx: int
     discord_id: int
@@ -89,7 +79,7 @@ def get_all_guild_points() -> List[GuidPointResults]:
     cursor.execute(sql)
     d = []
     for i, k in enumerate(cursor.fetchall()):
-        d.append((i + 1, k['discord_id'], _get_username(k['discord_id']), k['points']))
+        d.append((i + 1, k['discord_id'], get_username(k['discord_id']), k['points']))
     database.commit()
     cursor.close()
     return d

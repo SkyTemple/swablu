@@ -13,8 +13,16 @@
     <span>The download link provided is invalid. Discord links are not allowed since they won't work from outside Discord.</span>
 </div>
 {% end %}
+{% if invalid_author_list %}
+<div class="red">
+    <span>The author list provided is invalid. Make sure it's a list of comma-separated numeric Discord IDs, one for each author.</span>
+</div>
+{% end %}
 {% if saved %}
 <div class="success">Your changes were saved.</div>
+{% end %}
+{% if saved_authors_only %}
+<div class="success">Your changes to the author list were saved. Other fields were not saved due to required parameters being missing.</div>
 {% end %}
 <div class="form">
     <form action="/edit/{{ hack['key'] }}" method="post" enctype="multipart/form-data">
@@ -68,6 +76,19 @@
             Youtube Video: <input name="video" id="video" placeholder="YouTube URL" value="{{ hack['video'] or '' }}"/>
             <em>Link to a YouTube video to use as a trailer / the first episode of your machinima.</em>
         </label>
+        {% if is_admin %}
+        <hr>
+        <label for="authors">
+            Authors: <input name="authors" id="authors" placeholder="Comma-separated Discord IDs of each author" value="{{ author_ids }}">
+        </label>
+        <br>
+        Current author list:
+        <ul>
+            {% for author_entry in authors %}
+            <li>{{ author_entry[0] }} ({{ author_entry[1] }})</li>
+            {% end %}
+        </ul>
+        {% end %}
         {% if hack['message_id'] %}
         <hr>
         <label for="delscreenshot1">Delete screenshot 1: <input name="delscreenshot1" type="checkbox" id="delscreenshot1">

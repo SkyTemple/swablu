@@ -252,7 +252,7 @@ class ListHandler(CacheableHandler):
             if h['message_id'] is None:
                 continue
             h['author'] = get_hack_author_names_str(database, h['key'])
-            h['description'] = str(h['description'], 'utf-8').splitlines()
+            h['description'] = h['description'].splitlines()
             h['hack_type_printable'] = get_hack_type_str(h["hack_type"])
             h['featured_jams'] = []
             h['video'] = None  # don't show videos on the list.
@@ -290,7 +290,7 @@ class HackEntryHandler(CacheableHandler):
         if hack and hack['message_id']:
             self.cache_tags.append(f'hack-{hack["key"]}')
             authors = get_hack_author_names_str(database, hack['key'])
-            desc = str(hack['description'], 'utf-8')
+            desc = hack['description']
             description_lines = desc.splitlines()
             await self.render('hack_entry.html',
                               title=f'{hack["name"]} - SkyTemple Hack Directory',
@@ -342,8 +342,8 @@ class JamHandler(CacheableHandler):
             for hack in jam['hacks'].keys():
                 self.cache_tags.append(f'hack-{hack}')
                 hackdata[hack] = get_rom_hack(self.db, hack)
-                hackdata[hack]['author'] = get_hack_author_names_str(database, hack['key'])
-                hackdata[hack]['description'] = str(hackdata[hack]['description'], 'utf-8').splitlines()
+                hackdata[hack]['author'] = get_hack_author_names_str(database, hack)
+                hackdata[hack]['description'] = hackdata[hack]['description'].splitlines()
                 hackdata[hack]['awards'] = []
                 if 'awards' in jam:
                     for award, hacks in (jam['awards']['golden'] | jam['awards']['silver'] | jam['awards']['bronze']).items():
@@ -352,7 +352,7 @@ class JamHandler(CacheableHandler):
                                 hackdata[hack]['awards'].append(award)
             for dq in jam['dq']:
                 member = discord_client.get_user(int(dq['author']))
-                dq['author'] = member.name
+                dq['author'] = "???" if member is None else member.name
             award_groups = {}
             if 'awards' in jam:
                 for award in jam['awards']['golden'].keys():

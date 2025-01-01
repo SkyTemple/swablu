@@ -2,9 +2,9 @@ import time
 from typing import Optional
 
 import discord
-from discord import Client, TextChannel, Guild
+from discord import Client, TextChannel, User
 
-from swablu.config import DISCORD_GUILD_IDS
+from swablu.config import DISCORD_GUILD_IDS, discord_client
 from swablu.roles import get_hack_type_str
 
 async def regenerate_message(discord_client: Client, channel_id: int, message_id: Optional['int'], hack: dict):
@@ -46,6 +46,17 @@ def get_authors(discord_client, rrole: str, as_names=False):
     return authors
 
 
+def get_authors_as_ids(discord_client, role_name: str) -> list[int]:
+    # Only first guild supported
+    guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
+    authors = []
+    for role in guild.roles:
+        if role.name == role_name:
+            for member in role.members:
+                authors.append(member.id)
+    return authors
+
+
 async def has_role(discord_client: discord.Client, user_id: int, role_id: int) -> bool:
     """
     Checks if the given user has the given role on the server set in the config (DISCORD_GUILD_ID environment variable).
@@ -62,3 +73,18 @@ async def has_role(discord_client: discord.Client, user_id: int, role_id: int) -
         return False
 
     return role in user.roles
+
+
+def get_username(discord_id: int) -> str:
+    try:
+        u: User = discord_client.get_user(discord_id)
+        # if the discriminator is 0, they are using the name discord name system.
+        if u.discriminator == 0:
+            return u.name
+        return u.name + '#' + u.discriminator
+    except:
+        return f'<@{discord_id}>'
+
+
+def get_usernames(discord_ids: list[int]) -> list[str]:
+    return [get_username(discord_id) for discord_id in discord_ids]

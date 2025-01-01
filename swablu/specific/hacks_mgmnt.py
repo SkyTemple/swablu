@@ -148,7 +148,7 @@ async def process_get_hack_authors(message: Message, channel: TextChannel):
 
     cmd_parts = message.content.split(' ')
     if len(cmd_parts) < 2:
-        raise ValueError("Missing parameters. Usage: !get_hack_authors <hack key or name>")
+        raise ValueError("Missing parameters. Usage: !authors <hack key or name>")
 
     requested_hack = " ".join(cmd_parts[1:])
 
@@ -213,7 +213,7 @@ async def process_cmd(message: Message):
                 if not any(r.id in ALLOWED_ROLES_ADMIN for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")
                 await process_migrate_hack_roles(message.channel)
-            if cmd_parts[0] == prefix + 'get_hack_authors' or cmd_parts[0] == prefix + 'authors':
+            if cmd_parts[0] == prefix + 'authors':
                 await process_get_hack_authors(message, message.channel)
         except Exception as ex:
             logger.error("Error running hack management command", exc_info=ex)

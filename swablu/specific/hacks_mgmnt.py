@@ -167,18 +167,18 @@ async def process_get_hack_authors(message: Message, channel: TextChannel):
         matched_hacks_str = "\n".join([f"- {hack['name']}" for hack in matched_hacks])
         embed = Embed(description=matched_hacks_str)
 
-        await channel.send(f"Multiple hacks match '{requested_hack}':", embed=embed)
+        await channel.send(f"Multiple hacks match `{requested_hack}`:", embed=embed)
     else:
         hack = matched_hacks[0]
         authors = get_hack_authors(database, hack['key'])
 
         if len(authors) == 0:
-            await channel.send(f"List of authors for hack '{hack['name']}':\nNone")
+            await channel.send(f"List of authors for hack `{hack['name']}`:\nNone")
         else:
             authors_str = ", ".join([f"<@{author}>" for author in authors])
             embed = Embed(description=authors_str)
 
-            await channel.send(f"List of authors for hack '{hack['name']}':", embed=embed)
+            await channel.send(f"List of authors for hack `{hack['name']}`:", embed=embed)
 
 
 async def process_cmd(message: Message):

@@ -449,6 +449,12 @@ class EditFormHandler(AuthenticatedHandler):
         hack['description'] = self.get_body_argument('description', '')
         hack['hack_type'] = self.get_body_argument('hack_type', '')
         if hack['name'] == '' or hack['description'] == '' or hack['hack_type'] == '':
+            # Missing required arguments
+            if self.is_admin:
+                # At least update the author list
+                self._try_update_hack_authors(hack_id, hack)
+                return self.redirect(f'/edit/{hack_id}?saved_authors_only=1')
+
             return self.redirect(f'/edit/{hack_id}?missing_arg=1')
         logger.info("name: " + hack['name'])
         hack['url_main'] = self.get_body_argument('url_main', '')
@@ -478,6 +484,20 @@ class EditFormHandler(AuthenticatedHandler):
         if m:
             hack['video'] = m.group(7)
 
+        if self.is_admin:
+            self._try_update_hack_authors(hack_id, hack)
+
+        if discord_writes_enabled():
+            hack['message_id'] = await regenerate_message(database, self.discord_client, DISCORD_CHANNEL_HACKS,
+                                                          int(hack['message_id']) if hack['message_id'] else None, hack)
+
+        silent_edit = editing and self.get_body_argument('silent', '') != ''
+        update_hack(self.db, hack, silent_edit)
+        invalidate_cache(['hack', f'hack-{hack_id}'])
+        regenerate_htaccess()
+        return self.redirect(f'/edit/{hack_id}?saved=1')
+
+    def _try_update_hack_authors(self, hack_id: str, hack: dict):
         authors = self.get_body_argument('authors', '').replace(" ", "")
         if authors == "":
             author_ids = []
@@ -489,16 +509,6 @@ class EditFormHandler(AuthenticatedHandler):
 
         if self.is_admin:
             update_hack_authors(self.db, hack['key'], author_ids)
-
-        if discord_writes_enabled():
-            hack['message_id'] = await regenerate_message(database, self.discord_client, DISCORD_CHANNEL_HACKS,
-                                                          int(hack['message_id']) if hack['message_id'] else None, hack)
-
-        silent_edit = editing and self.get_body_argument('silent', '') != ''
-        update_hack(self.db, hack, silent_edit)
-        invalidate_cache(['hack', f'hack-{hack_id}'])
-        regenerate_htaccess()
-        return self.redirect(f'/edit/{hack_id}?saved=1')
 
     async def do_get(self, **kwargs):
         for hack in self.hack_access:
@@ -517,6 +527,7 @@ class EditFormHandler(AuthenticatedHandler):
                                   title='SkyTemple - Edit ROM Hack',
                                   hack=hack,
                                   saved=bool(self.get_argument('saved', '')),
+                                  saved_authors_only=bool(self.get_argument('saved_authors_only', '')),
                                   missing_arg=bool(self.get_argument('missing_arg', '')),
                                   is_admin=bool(self.is_admin),
                                   author_ids=author_ids_str,

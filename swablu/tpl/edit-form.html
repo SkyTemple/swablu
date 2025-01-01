@@ -21,6 +21,9 @@
 {% if saved %}
 <div class="success">Your changes were saved.</div>
 {% end %}
+{% if saved_authors_only %}
+<div class="success">Your changes to the author list were saved. Other fields were not saved due to required parameters being missing.</div>
+{% end %}
 <div class="form">
     <form action="/edit/{{ hack['key'] }}" method="post" enctype="multipart/form-data">
         <input type="hidden" name="key" value="{{ hack['key'] }}">

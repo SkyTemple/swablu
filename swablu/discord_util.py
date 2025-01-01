@@ -79,7 +79,7 @@ def get_username(discord_id: int) -> str:
     try:
         u: User = discord_client.get_user(discord_id)
         # if the discriminator is 0, they are using the name discord name system.
-        if u.discriminator == 0:
+        if u.discriminator == "0":
             return u.name
         return u.name + '#' + u.discriminator
     except:

@@ -24,8 +24,8 @@ from tornado.web import MissingArgumentError
 from swablu.config import discord_client, database, AUTHORIZATION_BASE_URL, OAUTH2_REDIRECT_URI, OAUTH2_CLIENT_ID, \
     OAUTH2_CLIENT_SECRET, TOKEN_URL, API_BASE_URL, DISCORD_GUILD_IDS, DISCORD_ADMIN_ROLES, get_rom_hacks, \
     regenerate_htaccess, DISCORD_CHANNEL_HACKS, update_hack, get_rom_hack, get_jam, vote_jam, discord_writes_enabled, \
-    get_jams, get_rom_hack_img, DISCORD_JAM_JURY_ROLE
-from swablu.discord_util import regenerate_message, get_authors, has_role
+    get_jams, get_rom_hack_img, DISCORD_JAM_JURY_ROLE, get_hack_authors, update_hack_authors
+from swablu.discord_util import regenerate_message, get_authors, has_role, get_usernames
 from swablu.roles import get_hack_type_str
 from swablu.specific import reputation
 from swablu.specific.translate_webhook import TranslateHookHandler
@@ -154,6 +154,7 @@ class AuthenticatedHandler(BaseHandler, ABC):
     def __init__(self, application: tornado.web.Application, request: httputil.HTTPServerRequest, **kwargs: any):
         self.hack_access = []
         self.user_id = None
+        self.is_admin = False
         super().__init__(application, request, **kwargs)
 
     async def auth(self, ignore_no_hacks=False):
@@ -192,9 +193,9 @@ class AuthenticatedHandler(BaseHandler, ABC):
             await self.not_authenticated()
             return False
 
-        is_admin = any([r.id in DISCORD_ADMIN_ROLES for r in member.roles])
+        self.is_admin = any([r.id in DISCORD_ADMIN_ROLES for r in member.roles])
         role_names = [r.name for r in member.roles if r.name.startswith("Hack")]
-        if is_admin:
+        if self.is_admin:
             self.hack_access = get_rom_hacks(self.db)
         else:
             self.hack_access = get_rom_hacks(self.db, role_names)
@@ -477,12 +478,23 @@ class EditFormHandler(AuthenticatedHandler):
         if m:
             hack['video'] = m.group(7)
 
+        authors = self.get_body_argument('authors', '').replace(" ", "")
+        if authors == "":
+            author_ids = []
+        else:
+            try:
+                author_ids = [int(value) for value in authors.split(",")]
+            except ValueError:
+                return self.redirect(f'/edit/{hack_id}?invalid_author_list=1')
+
         if discord_writes_enabled():
             hack['message_id'] = await regenerate_message(self.discord_client, DISCORD_CHANNEL_HACKS,
                                                           int(hack['message_id']) if hack['message_id'] else None, hack)
 
         silent_edit = editing and self.get_body_argument('silent', '') != ''
         update_hack(self.db, hack, silent_edit)
+        if self.is_admin:
+            update_hack_authors(self.db, hack['key'], author_ids)
         invalidate_cache(['hack', f'hack-{hack_id}'])
         regenerate_htaccess()
         return self.redirect(f'/edit/{hack_id}?saved=1')
@@ -490,12 +502,26 @@ class EditFormHandler(AuthenticatedHandler):
     async def do_get(self, **kwargs):
         for hack in self.hack_access:
             if hack['key'] == kwargs['hack_id']:
+                if self.is_admin:
+                    author_ids = get_hack_authors(database, hack['key'])
+                    author_names = get_usernames(author_ids)
+
+                    author_ids_str = ",".join([str(_id) for _id in get_hack_authors(database, hack['key'])])
+                    authors = [val for val in zip(author_ids, author_names)]
+                else:
+                    author_ids_str = ""
+                    authors = []
+
                 await self.render('edit-form.html',
                                   title='SkyTemple - Edit ROM Hack',
                                   hack=hack,
                                   saved=bool(self.get_argument('saved', '')),
                                   missing_arg=bool(self.get_argument('missing_arg', '')),
+                                  is_admin=bool(self.is_admin),
+                                  author_ids=author_ids_str,
+                                  authors=authors,
                                   invalid_download_link=bool(self.get_argument('invalid_download_link', '')),
+                                  invalid_author_list=bool(self.get_argument('invalid_author_list', '')),
                                   **DEFAULT_AUTHOR_DESCRIPTION)
                 return
         return self.redirect('/edit')

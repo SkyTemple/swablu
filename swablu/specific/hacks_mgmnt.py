@@ -27,11 +27,11 @@ prefix = '!'
 logger = logging.getLogger(__name__)
 
 
-def create_hack(name: str, role: Role):
+def create_hack(name: str):
     cursor = db_cursor(database)
-    sql = f"INSERT INTO {TABLE_NAME_HACKS} (`key`, `role_name`) VALUES(%s, %s)"
+    sql = f"INSERT INTO {TABLE_NAME_HACKS} (`key`, `role_name`) VALUES(%s, '')"
     cursor.execute(sql, (
-        name, role.name
+        name,
     ))
     database.commit()
     cursor.close()
@@ -49,13 +49,11 @@ def delete_hack(name: str):
 
 async def process_add_hack(message: Message, channel: TextChannel):
     cmd_parts = message.content.split(' ')
-    ctx = MiniCtx(message.guild, discord_client, message)
-    if len(cmd_parts) < 3:
-        raise ValueError("Missing parameters. Usage: !add_hack <key> <role>")
-    role = await RoleConverter().convert(ctx, cmd_parts[2])
-    create_hack(cmd_parts[1], role)
+    if len(cmd_parts) < 2:
+        raise ValueError("Missing parameters. Usage: !add_hack <key>")
+    create_hack(cmd_parts[1])
     await channel.send(
-        f"New Hack `{cmd_parts[1]}` created for role {role.name}"
+        f"New Hack `{cmd_parts[1]}` created successfully."
     )
 
 

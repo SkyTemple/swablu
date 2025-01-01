@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from time import sleep
+from typing import Optional
 
 import discord
 import pkg_resources
@@ -81,22 +82,20 @@ def check_table_exists(dbcon, tablename):
         return True
 
 
-def get_rom_hacks(dbcon, filter=None, sorted=False):
+def get_rom_hacks(dbcon, filter_author_id: Optional[int] = None, sorted=False):
     cursor = db_cursor(dbcon, dictionary=True, buffered=True)
-    if filter is None:
-        sql = f"SELECT * FROM `{TABLE_NAME_HACKS}`"
-        if sorted:
-            sql += f" ORDER BY date_updated DESC, name ASC"
-        cursor.execute(sql)
+
+    sql = f"SELECT * FROM `{TABLE_NAME_HACKS}`"
+    if filter_author_id:
+        sql += f" INNER JOIN {TABLE_NAME_AUTHORS} USING (`id`) WHERE author_id = %s"
+    if sorted:
+        sql += f" ORDER BY date_updated DESC, name ASC"
+
+    if filter_author_id:
+        cursor.execute(sql, (filter_author_id,))
     else:
-        if len(filter) < 1:
-            cursor.close()
-            return []
-        format_strings = ','.join(['%s'] * len(filter))
-        sql = f"SELECT * FROM `{TABLE_NAME_HACKS}` WHERE role_name IN (%s)"
-        if sorted:
-            sql += f" ORDER BY date_updated DESC, name DESC"
-        cursor.execute(sql % format_strings, tuple(filter))
+        cursor.execute(sql)
+
     d = []
     for k in cursor.fetchall():
         d.append(k)

@@ -487,14 +487,15 @@ class EditFormHandler(AuthenticatedHandler):
             except ValueError:
                 return self.redirect(f'/edit/{hack_id}?invalid_author_list=1')
 
+        if self.is_admin:
+            update_hack_authors(self.db, hack['key'], author_ids)
+
         if discord_writes_enabled():
             hack['message_id'] = await regenerate_message(database, self.discord_client, DISCORD_CHANNEL_HACKS,
                                                           int(hack['message_id']) if hack['message_id'] else None, hack)
 
         silent_edit = editing and self.get_body_argument('silent', '') != ''
         update_hack(self.db, hack, silent_edit)
-        if self.is_admin:
-            update_hack_authors(self.db, hack['key'], author_ids)
         invalidate_cache(['hack', f'hack-{hack_id}'])
         regenerate_htaccess()
         return self.redirect(f'/edit/{hack_id}?saved=1')

@@ -289,7 +289,7 @@ class HackEntryHandler(CacheableHandler):
         hack = get_rom_hack(self.db, kwargs['hack_id'])
         if hack and hack['message_id']:
             self.cache_tags.append(f'hack-{hack["key"]}')
-            authors = get_hack_author_mentions_str(database, hack['key'])
+            authors = get_hack_author_names_str(database, hack['key'])
             desc = str(hack['description'], 'utf-8')
             description_lines = desc.splitlines()
             await self.render('hack_entry.html',
@@ -342,7 +342,7 @@ class JamHandler(CacheableHandler):
             for hack in jam['hacks'].keys():
                 self.cache_tags.append(f'hack-{hack}')
                 hackdata[hack] = get_rom_hack(self.db, hack)
-                hackdata[hack]['author'] = get_hack_author_mentions_str(database, hack['key'])
+                hackdata[hack]['author'] = get_hack_author_names_str(database, hack['key'])
                 hackdata[hack]['description'] = str(hackdata[hack]['description'], 'utf-8').splitlines()
                 hackdata[hack]['awards'] = []
                 if 'awards' in jam:

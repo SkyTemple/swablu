@@ -4,11 +4,12 @@ from typing import Optional
 import discord
 from discord import Client, TextChannel, User
 
-from swablu.config import DISCORD_GUILD_IDS, discord_client
+from swablu.config import DISCORD_GUILD_IDS, discord_client, get_hack_authors
 from swablu.roles import get_hack_type_str
 
-async def regenerate_message(discord_client: Client, channel_id: int, message_id: Optional['int'], hack: dict):
-    authors = get_authors(discord_client, hack['role_name'], False)
+
+async def regenerate_message(dbcon, discord_client: Client, channel_id: int, message_id: Optional['int'], hack: dict):
+    authors = get_hack_author_mentions_str(dbcon, hack['key'])
     text = f'**{hack["name"]}** by {authors} ({get_hack_type_str(hack["hack_type"])}):\n<https://hacks.skytemple.org/h/{hack["key"]}>'
     channel: TextChannel = discord_client.get_channel(channel_id)
     try_count = 0
@@ -30,23 +31,20 @@ async def regenerate_message(discord_client: Client, channel_id: int, message_id
 
     return message_id
 
-def get_authors(discord_client, rrole: str, as_names=False):
-    # Only first guild (SkyTemple) supported
-    guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
-    authors = '???'
-    for role in guild.roles:
-        if role.name == rrole:
-            authors = []
-            for member in role.members:
-                if as_names:
-                    authors.append(member.name)
-                else:
-                    authors.append(f'<@{member.id}>')
-            authors = ', '.join(authors)
-    return authors
+
+def get_hack_author_names_str(dbcon, hack_key: str) -> str:
+    author_ids = get_hack_authors(dbcon, hack_key)
+    author_usernames = get_usernames(author_ids)
+    return ", ".join(author_usernames)
 
 
-def get_authors_as_ids(discord_client, role_name: str) -> list[int]:
+def get_hack_author_mentions_str(dbcon, hack_key: str) -> str:
+    author_ids = get_hack_authors(dbcon, hack_key)
+    author_mentions = [f"<@{_id}>" for _id in author_ids]
+    return ", ".join(author_mentions)
+
+
+def get_hack_author_ids_legacy(discord_client, role_name: str) -> list[int]:
     # Only first guild supported
     guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
     authors = []

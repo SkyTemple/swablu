@@ -19,13 +19,13 @@ from oauthlib.oauth2.rfc6749.errors import InvalidGrantError, TokenExpiredError
 from discord import Client, Guild, Member
 from mysql.connector import MySQLConnection
 from tornado import httputil
-from tornado.web import MissingArgumentError
 
 from swablu.config import discord_client, database, AUTHORIZATION_BASE_URL, OAUTH2_REDIRECT_URI, OAUTH2_CLIENT_ID, \
     OAUTH2_CLIENT_SECRET, TOKEN_URL, API_BASE_URL, DISCORD_GUILD_IDS, DISCORD_ADMIN_ROLES, get_rom_hacks, \
     regenerate_htaccess, DISCORD_CHANNEL_HACKS, update_hack, get_rom_hack, get_jam, vote_jam, discord_writes_enabled, \
     get_jams, get_rom_hack_img, DISCORD_JAM_JURY_ROLE, get_hack_authors, update_hack_authors
-from swablu.discord_util import regenerate_message, get_authors, has_role, get_usernames
+from swablu.discord_util import regenerate_message, has_role, get_usernames, get_hack_author_names_str, \
+    get_hack_author_mentions_str
 from swablu.roles import get_hack_type_str
 from swablu.specific import reputation
 from swablu.specific.translate_webhook import TranslateHookHandler
@@ -252,7 +252,7 @@ class ListHandler(CacheableHandler):
         for h in hacks_pre:
             if h['message_id'] is None:
                 continue
-            h['author'] = get_authors(self.discord_client, h['role_name'], True)
+            h['author'] = get_hack_author_names_str(database, h['key'])
             h['description'] = str(h['description'], 'utf-8').splitlines()
             h['hack_type_printable'] = get_hack_type_str(h["hack_type"])
             h['featured_jams'] = []
@@ -290,7 +290,7 @@ class HackEntryHandler(CacheableHandler):
         hack = get_rom_hack(self.db, kwargs['hack_id'])
         if hack and hack['message_id']:
             self.cache_tags.append(f'hack-{hack["key"]}')
-            authors = get_authors(self.discord_client, hack['role_name'], True)
+            authors = get_hack_author_mentions_str(database, hack['key'])
             desc = str(hack['description'], 'utf-8')
             description_lines = desc.splitlines()
             await self.render('hack_entry.html',
@@ -343,7 +343,7 @@ class JamHandler(CacheableHandler):
             for hack in jam['hacks'].keys():
                 self.cache_tags.append(f'hack-{hack}')
                 hackdata[hack] = get_rom_hack(self.db, hack)
-                hackdata[hack]['author'] = get_authors(self.discord_client, hackdata[hack]['role_name'], True)
+                hackdata[hack]['author'] = get_hack_author_mentions_str(database, hack['key'])
                 hackdata[hack]['description'] = str(hackdata[hack]['description'], 'utf-8').splitlines()
                 hackdata[hack]['awards'] = []
                 if 'awards' in jam:
@@ -488,7 +488,7 @@ class EditFormHandler(AuthenticatedHandler):
                 return self.redirect(f'/edit/{hack_id}?invalid_author_list=1')
 
         if discord_writes_enabled():
-            hack['message_id'] = await regenerate_message(self.discord_client, DISCORD_CHANNEL_HACKS,
+            hack['message_id'] = await regenerate_message(database, self.discord_client, DISCORD_CHANNEL_HACKS,
                                                           int(hack['message_id']) if hack['message_id'] else None, hack)
 
         silent_edit = editing and self.get_body_argument('silent', '') != ''

@@ -8,7 +8,7 @@ from swablu.util import MiniCtx
 
 from swablu.config import database, TABLE_NAME_HACKS, discord_client, discord_writes_enabled, get_jam, get_rom_hacks, \
     jam_exists, update_jam, create_jam, db_cursor, DISCORD_CHANNEL_HACKS, update_hack_authors, get_hack_authors
-from swablu.discord_util import regenerate_message, get_authors_as_ids
+from swablu.discord_util import regenerate_message, get_hack_author_ids_legacy
 from swablu.web import invalidate_jam_cache
 
 ALLOWED_ROLES = [
@@ -127,7 +127,7 @@ async def process_update_hack_list(channel: TextChannel):
     hacks = get_rom_hacks(database)
     for hack in hacks:
         if hack['message_id']:
-            await regenerate_message(discord_client, DISCORD_CHANNEL_HACKS, int(hack['message_id']), hack)
+            await regenerate_message(database, discord_client, DISCORD_CHANNEL_HACKS, int(hack['message_id']), hack)
 
     await channel.send("Hack list successfully updated")
 
@@ -138,7 +138,7 @@ async def process_migrate_hack_roles(channel: TextChannel):
 
     hacks = get_rom_hacks(database)
     for hack in hacks:
-        authors = get_authors_as_ids(discord_client, hack['role_name'])
+        authors = get_hack_author_ids_legacy(discord_client, hack['role_name'])
         update_hack_authors(database, hack['key'], authors)
 
     await channel.send("Hack roles successfully migrated.")

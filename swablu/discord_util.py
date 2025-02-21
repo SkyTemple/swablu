@@ -44,17 +44,6 @@ def get_hack_author_mentions_str(dbcon, hack_key: str) -> str:
     return ", ".join(author_mentions)
 
 
-def get_hack_author_ids_legacy(discord_client, role_name: str) -> list[int]:
-    # Only first guild supported
-    guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
-    authors = []
-    for role in guild.roles:
-        if role.name == role_name:
-            for member in role.members:
-                authors.append(member.id)
-    return authors
-
-
 async def has_role(discord_client: discord.Client, user_id: int, role_id: int) -> bool:
     """
     Checks if the given user has the given role on the server set in the config (DISCORD_GUILD_ID environment variable).

@@ -8,7 +8,7 @@ from swablu.util import MiniCtx
 
 from swablu.config import database, TABLE_NAME_HACKS, discord_client, discord_writes_enabled, get_jam, get_rom_hacks, \
     jam_exists, update_jam, create_jam, db_cursor, DISCORD_CHANNEL_HACKS, update_hack_authors, get_hack_authors
-from swablu.discord_util import regenerate_message, get_hack_author_ids_legacy
+from swablu.discord_util import regenerate_message
 from swablu.web import invalidate_jam_cache
 
 ALLOWED_ROLES = [
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 def create_hack(name: str):
     cursor = db_cursor(database)
-    sql = f"INSERT INTO {TABLE_NAME_HACKS} (`key`, `role_name`) VALUES(%s, '')"
+    sql = f"INSERT INTO {TABLE_NAME_HACKS} (`key`) VALUES(%s)"
     cursor.execute(sql, (
         name,
     ))
@@ -130,18 +130,6 @@ async def process_update_hack_list(channel: TextChannel):
     await channel.send("Hack list successfully updated")
 
 
-async def process_migrate_hack_roles(channel: TextChannel):
-    if not discord_writes_enabled():
-        raise ValueError("Cannot migrate hack author list: Discord writes are disabled in the config.")
-
-    hacks = get_rom_hacks(database)
-    for hack in hacks:
-        authors = get_hack_author_ids_legacy(discord_client, hack['role_name'])
-        update_hack_authors(database, hack['key'], authors)
-
-    await channel.send("Hack roles successfully migrated.")
-
-
 async def process_get_hack_authors(message: Message, channel: TextChannel):
     if not discord_writes_enabled():
         raise ValueError("Cannot retrieve hack author list: Discord writes are disabled in the config.")
@@ -209,10 +197,6 @@ async def process_cmd(message: Message):
                 if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")
                 await process_update_hack_list(message.channel)
-            if cmd_parts[0] == prefix + 'migrate_hack_roles':
-                if not any(r.id in ALLOWED_ROLES_ADMIN for r in message.author.roles):
-                    raise RuntimeError("You are not allowed to use this command.")
-                await process_migrate_hack_roles(message.channel)
             if cmd_parts[0] == prefix + 'authors':
                 await process_get_hack_authors(message, message.channel)
         except Exception as ex:

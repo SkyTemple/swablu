@@ -317,10 +317,8 @@ if not check_table_exists(database, TABLE_NAME_HACKS):
         `url_download` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_bin,
         `video` VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_bin,
         `hack_type` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_bin,
-        `role_name` VARCHAR(60) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
         `message_id` BIGINT(30) unsigned,
         PRIMARY KEY (`id`),
-        INDEX (`role_name`),
         INDEX (`key`)
     );
     """)

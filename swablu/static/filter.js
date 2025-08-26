@@ -23,6 +23,7 @@ function refilter() {
     // this is garbage.
     var hack_types = [
         'balance_hack_wip', 'balance_hack_mostly', 'balance_hack',
+        'gameplay_hack_wip', 'gameplay_hack_mostly', 'gameplay_hack',
         'story_hack_wip', 'story_hack_mostly', 'story_hack',
         'translation_wip', 'translation_mostly', 'translation',
         'misc_hack_wip', 'misc_hack_mostly', 'misc_hack',
@@ -31,19 +32,22 @@ function refilter() {
     
     switch (selStatus.value) {
         case "wip":
-            _keep(hack_types, ['balance_hack_wip', 'story_hack_wip', 'translation_wip', 'misc_hack_wip', 'machinima_ongoing']);
+            _keep(hack_types, ['balance_hack_wip', 'gameplay_hack_wip', 'story_hack_wip', 'translation_wip', 'misc_hack_wip', 'machinima_ongoing']);
             break;
         case "mostly":
-            _keep(hack_types, ['balance_hack_mostly', 'story_hack_mostly', 'translation_mostly', 'misc_hack_mostly', 'machinima_ongoing']);
+            _keep(hack_types, ['balance_hack_mostly', 'gameplay_hack_mostly', 'story_hack_mostly', 'translation_mostly', 'misc_hack_mostly', 'machinima_ongoing']);
             break;
         case "finished":
-            _keep(hack_types, ['balance_hack', 'story_hack', 'translation', 'misc_hack', 'machinima']);
+            _keep(hack_types, ['balance_hack', 'gameplay_hack', 'story_hack', 'translation', 'misc_hack', 'machinima']);
             break;
     }
     
     switch (selType.value) {
         case "balance_hack":
             _keep(hack_types, ['balance_hack_wip', 'balance_hack_mostly', 'balance_hack']);
+            break;
+        case "gameplay_hack":
+            _keep(hack_types, ['gameplay_hack_wip', 'gameplay_hack_mostly', 'gameplay_hack']);
             break;
         case "story_hack":
             _keep(hack_types, ['story_hack_wip', 'story_hack_mostly', 'story_hack']);

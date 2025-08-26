@@ -54,6 +54,12 @@ def get_hack_type_str(hack_type):
         return "Balance Hack (mostly finished)"
     if hack_type == "balance_hack":
         return "Balance Hack (finished)"
+    if hack_type == "gameplay_hack_wip":
+        return "Gameplay Hack (work in progress)"
+    if hack_type == "gameplay_hack_mostly":
+        return "Gameplay Hack (mostly finished)"
+    if hack_type == "gameplay_hack":
+        return "Gameplay Hack (finished)"
     if hack_type == "story_hack_wip":
         return "Story Hack (work in progress)"
     if hack_type == "story_hack_mostly":

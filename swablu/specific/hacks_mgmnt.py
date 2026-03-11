@@ -7,7 +7,7 @@ from discord import Message, TextChannel, Role, File, Embed
 from discord.ext.commands import RoleConverter
 from swablu.util import MiniCtx
 
-from swablu.config import database, TABLE_NAME_HACKS, discord_client, discord_writes_enabled, get_jam, get_rom_hacks, \
+from swablu.config import database, TABLE_NAME_HACKS, discord_client, discord_writes_enabled, get_jam, get_rom_hack, get_rom_hacks, \
     jam_exists, update_jam, create_jam, db_cursor, DISCORD_CHANNEL_HACKS, update_hack_authors, get_hack_authors
 from swablu.discord_util import regenerate_message
 from swablu.web import invalidate_jam_cache
@@ -59,6 +59,11 @@ async def process_add_hack(message: Message, channel: TextChannel):
     if (not hack_key_regex.match(key)):
         raise ValueError(
             "Invalid hack ID. IDs must only contain numbers, lowercase characters, and underscores."
+        )
+    
+    if (get_rom_hack(database, key)):
+        raise ValueError(
+            "A hack with this ID already exists."
         )
     
     create_hack(key)

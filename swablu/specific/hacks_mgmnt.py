@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from io import StringIO
 
 from discord import Message, TextChannel, Role, File, Embed
@@ -25,23 +26,24 @@ ALLOWED_ROLES_ADMIN = [
 
 prefix = '!'
 logger = logging.getLogger(__name__)
+hack_key_regex = re.compile(r"^[0-9a-z_]+$")
 
 
-def create_hack(name: str):
+def create_hack(key: str):
     cursor = db_cursor(database)
     sql = f"INSERT INTO {TABLE_NAME_HACKS} (`key`) VALUES(%s)"
     cursor.execute(sql, (
-        name,
+        key,
     ))
     database.commit()
     cursor.close()
 
 
-def delete_hack(name: str):
+def delete_hack(key: str):
     cursor = db_cursor(database)
     sql = f"DELETE FROM {TABLE_NAME_HACKS} WHERE `key` = %s"
     cursor.execute(sql, (
-        name,
+        key,
     ))
     database.commit()
     cursor.close()
@@ -51,9 +53,17 @@ async def process_add_hack(message: Message, channel: TextChannel):
     cmd_parts = message.content.split(' ')
     if len(cmd_parts) < 2:
         raise ValueError("Missing parameters. Usage: !add_hack <key>")
-    create_hack(cmd_parts[1])
+    
+    key = cmd_parts[1]
+    
+    if (not hack_key_regex.match(key)):
+        raise ValueError(
+            "Invalid hack ID. IDs must only contain numbers, lowercase characters, and underscores."
+        )
+    
+    create_hack(key)
     await channel.send(
-        f"New Hack `{cmd_parts[1]}` created successfully."
+        f"New Hack `{key}` created successfully."
     )
 
 

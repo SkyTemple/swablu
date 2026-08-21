@@ -24,9 +24,8 @@ from swablu.config import discord_client, database, AUTHORIZATION_BASE_URL, OAUT
     OAUTH2_CLIENT_SECRET, TOKEN_URL, API_BASE_URL, DISCORD_GUILD_IDS, DISCORD_ADMIN_ROLES, get_rom_hacks, \
     regenerate_htaccess, DISCORD_CHANNEL_HACKS, update_hack, get_rom_hack, get_jam, vote_jam, discord_writes_enabled, \
     get_jams, get_rom_hack_img, DISCORD_JAM_JURY_ROLE, get_hack_authors, update_hack_authors
-from swablu.discord_util import regenerate_message, has_role, get_usernames, get_hack_author_names_str, \
-    get_hack_author_mentions_str
-from swablu.roles import get_hack_type_str
+from swablu.discord_util import regenerate_message, has_role, get_usernames, get_hack_author_names_str
+from swablu.hack_type import get_hack_type_str
 from swablu.specific import reputation
 from swablu.specific.translate_webhook import TranslateHookHandler
 from swablu.util import VotingAllowedStatus

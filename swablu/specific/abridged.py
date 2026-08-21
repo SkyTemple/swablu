@@ -2,7 +2,7 @@ import logging
 from asyncio import sleep
 from random import randrange
 
-from discord import Guild, TextChannel, Role, Embed, Colour
+from discord import Guild, TextChannel, Role
 
 from swablu.config import discord_writes_enabled, discord_client
 MIN_APPEAR_TIME = 1  # min

@@ -5,7 +5,7 @@ import discord
 from discord import Client, TextChannel, User
 
 from swablu.config import DISCORD_GUILD_IDS, discord_client, get_hack_authors
-from swablu.roles import get_hack_type_str
+from swablu.hack_type import get_hack_type_str
 
 
 async def regenerate_message(dbcon, discord_client: Client, channel_id: int, message_id: Optional['int'], hack: dict):

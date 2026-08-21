@@ -11,8 +11,6 @@ from mysql.connector import MySQLConnection, OperationalError
 from mysql.connector.cursor import MySQLCursor
 
 intents = discord.Intents.default()
-intents.members = True
-intents.presences = True
 discord_client = discord.Client(intents=intents)
 TABLE_NAME_HACKS = 'rom_hacks'
 TABLE_NAME_AUTHORS = 'hack_authors'

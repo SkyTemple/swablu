@@ -46,11 +46,11 @@ async def on_message(message: Message):
 
 
 def check_and_remove_message_prefix(message: Message) -> bool:
-    if message.content.startswith("<@" + str(discord_client.user.id) + ">"):
-        message.content = message.content.removeprefix("<@" + str(discord_client.user.id) + ">")
-        return True
-    elif message.content.startswith("<@" + str(discord_client.user.id) + "> "):
+    if message.content.startswith("<@" + str(discord_client.user.id) + "> "):
         message.content = message.content.removeprefix("<@" + str(discord_client.user.id) + "> ")
+        return True
+    elif message.content.startswith("<@" + str(discord_client.user.id) + ">"):
+        message.content = message.content.removeprefix("<@" + str(discord_client.user.id) + ">")
         return True
     else:
         return False

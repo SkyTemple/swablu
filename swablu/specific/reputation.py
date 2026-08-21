@@ -37,7 +37,6 @@ DEFAULT_AUTHOR_DESCRIPTION = {
     'description': "ROM editor for Pokémon Mystery Dungeon Explorers of Sky. Let's you edit starters, graphics, scenes, dungeons and more!"
 }
 
-prefix = '!'
 logger = logging.getLogger(__name__)
 
 
@@ -91,9 +90,7 @@ async def process_cmd_dm(message: Message):
     # Only first server (SkyTemple) supported.
     ctx = MiniCtx(discord_client.get_guild(DISCORD_GUILD_IDS[0]), discord_client, message)
     try:
-        if not cmd_parts[0].startswith(prefix):
-            return
-        if cmd_parts[0] == prefix + 'gr' or cmd_parts[0] == prefix + 'tr':
+        if cmd_parts[0] == 'gr' or cmd_parts[0] == 'tr':
             if len(cmd_parts) < 4:
                 await message.channel.send(json.dumps({
                     'status': 'error',
@@ -101,12 +98,12 @@ async def process_cmd_dm(message: Message):
                 }))
                 return
             channel = await channel_converter.convert(ctx, cmd_parts[3])
-            await process_gr(message, channel, cmd_parts[0] == prefix + 'tr')
+            await process_gr(message, channel, cmd_parts[0] == 'tr')
             await message.channel.send(json.dumps({
                 'status': 'success',
                 'result': 'See channel.'
             }))
-        elif cmd_parts[0] == prefix + 'checkr':
+        elif cmd_parts[0] == 'checkr':
             gps = get_guild_points_for(await UserConverter().convert(ctx, cmd_parts[1]))
             await message.channel.send(json.dumps({
                 'status': 'success',
@@ -182,13 +179,13 @@ async def process_cmd(message: Message):
             else:
                 cmd_parts = message.content.split(' ')
                 try:
-                    if cmd_parts[0] == prefix + 'gr' or cmd_parts[0] == prefix + 'tr':
+                    if cmd_parts[0] == 'gr' or cmd_parts[0] == 'tr':
                         if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
                             raise RuntimeError("You are not allowed to give or take Guild Points.")
-                        await process_gr(message, message.channel, cmd_parts[0] == prefix + 'tr')
-                    elif cmd_parts[0] == prefix + 'checkr':
+                        await process_gr(message, message.channel, cmd_parts[0] == 'tr')
+                    elif cmd_parts[0] == 'checkr':
                         await process_checkr(message)
-                    elif cmd_parts[0] == prefix + 'toprep':
+                    elif cmd_parts[0] == 'toprep':
                         await process_toprep(message)
                 except Exception as ex:
                     logger.error("Error running rep command", exc_info=ex)

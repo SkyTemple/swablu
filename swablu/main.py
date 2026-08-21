@@ -49,16 +49,32 @@ async def on_member_update(before: Member, after: Member):
 
 @discord_client.event
 async def on_message(message: Message):
-    if await eos_dungeons.process_message(message):
-        return
-    if not discord_writes_enabled():
-        return
-    if message.guild.id in DISCORD_GUILD_IDS:
-        await reputation.process_cmd(message)
-        await hacks_mgmnt.process_cmd(message)
-        await general_memes.process_cmd(message)
+    if check_and_remove_message_prefix(message):
+        logger.info("Message by " + str(message.author.id) + ": " + message.content)
+
+        if await eos_dungeons.process_message(message):
+            return
+        if not discord_writes_enabled():
+            return
+        if message.guild.id in DISCORD_GUILD_IDS:
+            await reputation.process_cmd(message)
+            await hacks_mgmnt.process_cmd(message)
+            await general_memes.process_cmd(message)
+        else:
+            await general_memes.process_cmd(message)
     else:
-        await general_memes.process_cmd(message)
+        logger.info("Ignoring message by " + str(message.author.id) + ": " + message.content)
+
+
+def check_and_remove_message_prefix(message: Message) -> bool:
+    if message.content.startswith("<@" + str(discord_client.user.id) + ">"):
+        message.content = message.content.removeprefix("<@" + str(discord_client.user.id) + ">")
+        return True
+    elif message.content.startswith("<@" + str(discord_client.user.id) + "> "):
+        message.content = message.content.removeprefix("<@" + str(discord_client.user.id) + "> ")
+        return True
+    else:
+        return False
 
 
 logger.info('Starting!')

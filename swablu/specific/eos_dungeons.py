@@ -1,7 +1,8 @@
 """
 This bot provides dungeon preview images based on dungeon floor descriptions.
 
-Submit a message with a dungeon floor XML file and you will receive a reply with the rendered dungeon.
+Submit a message with a dungeon floor XML file and you will receive a reply with the rendered dungeon. The message must
+start with a ping to the bot.
 
 If the message contains no attachment it is ignored, so you can also just chat and discuss floor layouts in
 this channel.
@@ -25,7 +26,7 @@ The following strings can be contained in the message and change how the floor i
   - `+nopatches`: Renders the floor as if the "UnusedDungeonChancePatch" patch is not applied
   - `+seed:<seed>`: Sets the seed for the random number generator.
 
-Example: "+onlyfloor +nokecleon +seed:12345"
+Example: "@Swablu +onlyfloor +nokecleon +seed:12345"
 """
 import logging
 import os

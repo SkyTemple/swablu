@@ -24,7 +24,6 @@ ALLOWED_ROLES_ADMIN = [
     367451227551694852,  # Test server - Admin
 ]
 
-prefix = '!'
 logger = logging.getLogger(__name__)
 hack_key_regex = re.compile(r"^[0-9a-z_]+$")
 
@@ -188,31 +187,31 @@ async def process_cmd(message: Message):
     if isinstance(message.channel, TextChannel):
         cmd_parts = message.content.split(' ')
         try:
-            if cmd_parts[0] == prefix + 'add_hack':
+            if cmd_parts[0] == 'add_hack':
                 if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")
                 await process_add_hack(message, message.channel)
-            if cmd_parts[0] == prefix + 'delete_hack':
+            if cmd_parts[0] == 'delete_hack':
                 if not any(r.id in ALLOWED_ROLES_ADMIN for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")
                 await process_delete_hack(message, message.channel)
-            if cmd_parts[0] == prefix + 'dump_jam':
+            if cmd_parts[0] == 'dump_jam':
                 if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")
                 await process_dump_jam(message, message.channel)
-            if cmd_parts[0] == prefix + 'create_jam':
+            if cmd_parts[0] == 'create_jam':
                 if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")
                 await process_create_jam(message, message.channel)
-            if cmd_parts[0] == prefix + 'update_jam':
+            if cmd_parts[0] == 'update_jam':
                 if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")
                 await process_update_jam(message, message.channel)
-            if cmd_parts[0] == prefix + 'update_hack_list':
+            if cmd_parts[0] == 'update_hack_list':
                 if not any(r.id in ALLOWED_ROLES for r in message.author.roles):
                     raise RuntimeError("You are not allowed to use this command.")
                 await process_update_hack_list(message.channel)
-            if cmd_parts[0] == prefix + 'authors':
+            if cmd_parts[0] == 'authors':
                 await process_get_hack_authors(message, message.channel)
         except Exception as ex:
             logger.error("Error running hack management command", exc_info=ex)

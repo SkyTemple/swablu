@@ -21,14 +21,23 @@ MAX_WAIT_TIME = 21600
 
 async def abridged():
     guild: Guild = discord_client.get_guild(GUILD_ID)
+    if guild is None:
+        return
+
     channel: TextChannel = guild.get_channel(DISTORTION_WORLD)
+    if channel is None:
+        return
+
     smode = max((randrange(MIN_WAIT_TIME, MAX_WAIT_TIME + 1) for _ in range(0, 2)))
     logger.info(f"Changed distortion world slow mode to {smode}.")
     await channel.edit(slowmode_delay=smode)
     if randrange(0, 10) == 0:
+        channel: TextChannel = guild.get_channel(FLATOT)
+        if channel is None:
+            return
+
         appear_time = randrange(MIN_APPEAR_TIME, MAX_APPEAR_TIME)
         logger.info(f'FLATOT EVENT! Ends in {appear_time} min.')
-        channel: TextChannel = guild.get_channel(FLATOT)
         everyone: Role = guild.default_role
         await channel.set_permissions(everyone, read_messages=True)
         await sleep(appear_time * 60)
@@ -40,7 +49,13 @@ async def schedule_abridged():
     if not discord_writes_enabled():
         await sleep(5)
         guild: Guild = discord_client.get_guild(GUILD_ID)
+        if guild is None:
+            return
+
         channel: TextChannel = guild.get_channel(FLATOT)
+        if channel is None:
+            return
+
         everyone: Role = guild.default_role
         await channel.set_permissions(everyone, read_messages=False)
         return

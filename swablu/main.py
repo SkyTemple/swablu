@@ -33,16 +33,12 @@ async def on_ready():
 @discord_client.event
 async def on_message(message: Message):
     if check_and_remove_message_prefix(message):
-        logger.info("Message by " + str(message.author.id) + ": " + message.content)
-
         if await eos_dungeons.process_message(message):
             return
         if not discord_writes_enabled():
             return
         if message.guild.id in DISCORD_GUILD_IDS:
             await hacks_mgmnt.process_cmd(message)
-    else:
-        logger.info("Ignoring message by " + str(message.author.id) + ": " + message.content)
 
 
 def check_and_remove_message_prefix(message: Message) -> bool:

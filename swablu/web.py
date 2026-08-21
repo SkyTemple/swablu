@@ -32,8 +32,8 @@ from swablu.util import VotingAllowedStatus
 
 OAUTH_SCOPE = ['identify']
 DEFAULT_AUTHOR_DESCRIPTION = {
-    'author': 'Parakoopa',
-    'description': "ROM editor for Pokémon Mystery Dungeon Explorers of Sky. Let's you edit starters, graphics, scenes, dungeons and more!"
+    'author': 'Capypara and SkyTemple contributors',
+    'description': "ROM editor for Pokémon Mystery Dungeon Explorers of Sky. Lets you edit starters, graphics, scenes, dungeons and more!"
 }
 ALLOWED_MIMES = ['image/jpeg', 'image/png']
 

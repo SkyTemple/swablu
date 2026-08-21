@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from swablu.specific import reputation, hacks_mgmnt, eos_dungeons
+from swablu.specific import hacks_mgmnt, eos_dungeons
 from swablu.specific.abridged import schedule_abridged
 
 logging.basicConfig(
@@ -40,7 +40,6 @@ async def on_message(message: Message):
         if not discord_writes_enabled():
             return
         if message.guild.id in DISCORD_GUILD_IDS:
-            await reputation.process_cmd(message)
             await hacks_mgmnt.process_cmd(message)
     else:
         logger.info("Ignoring message by " + str(message.author.id) + ": " + message.content)

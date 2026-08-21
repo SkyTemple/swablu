@@ -14,7 +14,6 @@ intents = discord.Intents.default()
 discord_client = discord.Client(intents=intents)
 TABLE_NAME_HACKS = 'rom_hacks'
 TABLE_NAME_AUTHORS = 'hack_authors'
-TABLE_NAME_REPUTATION = 'rep'
 TABLE_NAME_JAM = 'jam'
 TABLE_NAME_JAM_VOTES = 'jam_votes'
 logger = logging.getLogger(__name__)
@@ -337,21 +336,6 @@ if not check_table_exists(database, TABLE_NAME_AUTHORS):
     dbcur.close()
 else:
     logger.info("Authors table existed!")
-
-if not check_table_exists(database, TABLE_NAME_REPUTATION):
-    dbcur = db_cursor(database)
-    logger.info("Creating reputation table...")
-    # Could surely be optimized, but fine for now.
-    dbcur.execute(f"""
-    CREATE TABLE `{TABLE_NAME_REPUTATION}` (
-        `discord_id` BIGINT(30) unsigned NOT NULL,
-        `points` INT(20) signed NOT NULL,
-        PRIMARY KEY (`discord_id`)
-    );
-    """)
-    dbcur.close()
-else:
-    logger.info("Reputation table existed!")
 
 if not check_table_exists(database, TABLE_NAME_JAM):
     dbcur = db_cursor(database)

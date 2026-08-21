@@ -26,7 +26,6 @@ from swablu.config import discord_client, database, AUTHORIZATION_BASE_URL, OAUT
     get_jams, get_rom_hack_img, DISCORD_JAM_JURY_ROLE, get_hack_authors, update_hack_authors
 from swablu.discord_util import regenerate_message, has_role, get_usernames, get_hack_author_names_str
 from swablu.hack_type import get_hack_type_str
-from swablu.specific import reputation
 from swablu.specific.translate_webhook import TranslateHookHandler
 from swablu.util import VotingAllowedStatus
 
@@ -552,4 +551,4 @@ routes = [
     (r"/edit/?", EditListHandler, extra),
     (r"/edit/(?P<hack_id>[^\/]+)/?", EditFormHandler, extra),
     (r"/translate_hook", TranslateHookHandler, extra),
-] + reputation.collect_web_routes(extra)
+]

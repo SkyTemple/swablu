@@ -11,6 +11,9 @@ from mysql.connector import MySQLConnection, OperationalError
 from mysql.connector.cursor import MySQLCursor
 
 intents = discord.Intents.default()
+# We need this to cache the whole server member list, which is in turn needed to quickly resolve hack author IDs
+# to usernames. We can't afford to do 300+ requests to the "get user by ID" endpoint to load the hack list.
+intents.members = True
 discord_client = discord.Client(intents=intents)
 TABLE_NAME_HACKS = 'rom_hacks'
 TABLE_NAME_AUTHORS = 'hack_authors'

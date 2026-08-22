@@ -16,7 +16,7 @@ import os
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2.rfc6749.errors import InvalidGrantError, TokenExpiredError
 
-from discord import Client, Guild, Member
+from discord import Client, Guild, Member, HTTPException
 from mysql.connector import MySQLConnection
 from tornado import httputil
 
@@ -185,6 +185,13 @@ class AuthenticatedHandler(BaseHandler, ABC):
         guild: Guild = discord_client.get_guild(DISCORD_GUILD_IDS[0])
         self.user_id = user_id
         member: Member = guild.get_member(int(user_id))
+        if not member:
+            # Try a direct fetch instead, in case the user isn't cached
+            try:
+                member = await guild.fetch_member(int(user_id))
+            except HTTPException:
+                pass
+
         if not member:
             if ignore_no_hacks:
                 return True
